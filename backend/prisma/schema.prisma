@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  email     String    @unique
+  password  String    
+  firstname String    @default("FirstName")
+  lastname  String
+  userId   Int       @id @unique @default(autoincrement())
+  type      UserType @default(VISITOR)
+  enabled   Boolean   @default(false)
+  admins    Admin?
+  clients   Client?
+  desks     Desk?
+  doctors   Doctor?
+
+  @@map("users")
+}
+
+model Client {
+  userId Int      @id @unique
+  user     User    @relation(fields: [userId], references: [userId])
+  Visits    Visit[]
+
+  @@map("clients")
+}
+
+model Doctor {
+  specialty String
+  userId Int      @unique
+  users     User    @relation(fields: [userId], references: [userId])
+  Visits    Visit[]
+
+  @@map("doctors")
+}
+
+model Visit {
+  visit_date    DateTime
+  clientId     Int
+  creation_date DateTime @default(now())
+  doctorId     Int
+  visitId      Int      @id @unique @default(autoincrement())
+  Client        Client  @relation(fields: [clientId], references: [userId])
+  Doctor        Doctor  @relation(fields: [doctorId], references: [userId])
+
+  @@map("visits")
+}
+
+model Desk {
+  userId Int   @unique
+  users   User @relation(fields: [userId], references: [userId])
+
+  @@map("desks")
+}
+
+model Admin {
+  userId Int   @unique
+  users    User @relation(fields: [userId], references: [userId])
+
+  @@map("admins")
+}
+
+enum UserType {
+  VISITOR
+  ADMIN
+  CLIENT
+  DOCTOR
+  DESK
+
+  @@map("user_type")
+}

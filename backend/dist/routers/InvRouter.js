@@ -1,0 +1,15 @@
+import { Router } from "express";
+import InvController from "../services/inventory-managment/InvController";
+const ivRouter = Router();
+const ivtry = new InvController();
+ivRouter.post('/item/store', ivtry.storeItem);
+ivRouter.post('/item/findbyid', ivtry.findItemById);
+ivRouter.post('/item/findb.firstname', ivtry.findItemByName);
+ivRouter.post('/item/update', ivtry.updateItem);
+ivRouter.post('/item/remove', ivtry.removeItem);
+ivRouter.post('/med/store', ivtry.storeMed);
+ivRouter.post('/med/findbyid', ivtry.findMedById);
+ivRouter.post('/med/findb.firstnamed', ivtry.findMedByName);
+ivRouter.post('/med/update', ivtry.updateMed);
+ivRouter.post('/med/remove', ivtry.removeMed);
+export default ivRouter;
