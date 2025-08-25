@@ -1,0 +1,40 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    image: project-backend-dev:latest
+    container_name: project-backend
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL="postgresql://postgres:2001@localhost:5432/hosp-project?schema=public"
+      - REFRESH_TOKEN_SECRET="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      - REFRESH_TOKEN_LIFE='2592000000' # 30 days in miliseconds (1000 * 60 * 60 * 14 * 30)
+      - ACCESS_TOKEN_SECRET="e67e72111b363d80c8124d28193926000980e1211c7986cacbd26aacc5528d48"
+      - ACCESS_TOKEN_LIFE='3600000' # 1 hour in miliseconds (1000 * 60 * 60)
+      - PORT=3010
+    ports:
+      - "3010:3010"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules        # keep container's node_modules, not host’s
+    # If you use Prisma and want codegen on container start, you can also:
+    # command: sh -lc "npx prisma generate || true && npm run dev"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    image: project-frontend-dev:latest
+    container_name: project-frontend
+    depends_on:
+      - backend
+    environment:
+      # Point your FE to the API during dev (if you reference it)
+      # In React code, read import.meta.env.VITE_API_URL
+      - VITE_API_URL=http://localhost:5713
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
