@@ -11,7 +11,7 @@ const defaultUserInfo = {
   email: '',
   firstname: '',
   lastname: '',
-  type: UserTypeEnumSchema.Enum['VISITOR']
+  type: 'VISITOR' // UserTypeEnumSchema.Enum['VISITOR']
 }
 
 export type TAuthContext = {
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
     }
   }, [ userData ])
   
-
+  console.log(isLoading)
   if(isLoading) {
     return <LoadingPage />
   }

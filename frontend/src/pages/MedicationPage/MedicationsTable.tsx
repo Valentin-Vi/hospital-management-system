@@ -200,7 +200,6 @@ export default function MedicationsTable({ data }: TMedicationsTableParams) {
             <tr
               className="hover:bg-blue-50"
               key={row.id}
-              onClick={}
             >
               {row.getVisibleCells().map((cell) => (
                 <td

@@ -1,4 +1,20 @@
 services:
+  db:
+    image: postgres:16
+    container_name: project-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=2001
+      - POSTGRES_DB=hosp-project
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hosp-project"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -6,35 +22,43 @@ services:
     container_name: project-backend
     environment:
       - NODE_ENV=production
-      - DATABASE_URL="postgresql://postgres:2001@localhost:5432/hosp-project?schema=public"
-      - REFRESH_TOKEN_SECRET="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      - REFRESH_TOKEN_LIFE='2592000000' # 30 days in miliseconds (1000 * 60 * 60 * 14 * 30)
-      - ACCESS_TOKEN_SECRET="e67e72111b363d80c8124d28193926000980e1211c7986cacbd26aacc5528d48"
-      - ACCESS_TOKEN_LIFE='3600000' # 1 hour in miliseconds (1000 * 60 * 60)
+      - DATABASE_URL=postgresql://postgres:2001@db:5432/hosp-project?schema=public
+      - REFRESH_TOKEN_SECRET=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - REFRESH_TOKEN_LIFE=2592000000
+      - ACCESS_TOKEN_SECRET=e67e72111b363d80c8124d28193926000980e1211c7986cacbd26aacc5528d48
+      - ACCESS_TOKEN_LIFE=3600000
       - PORT=3010
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "3010:3010"
+      - "5555:5555" # Prisma studio default port
     volumes:
       - ./backend:/app
-      - /app/node_modules        # keep container's node_modules, not host’s
-    # If you use Prisma and want codegen on container start, you can also:
-    # command: sh -lc "npx prisma generate || true && npm run dev"
+      - /app/node_modules
     restart: unless-stopped
+    command: >
+      sh -lc '
+        [ -d node_modules ] || npm ci;
+        npx prisma migrate deploy;
+        npx prisma generate;
+        npx prisma db seed;
+        npm run dev
+      '
 
   frontend:
     build:
       context: ./frontend
-    image: project-frontend-dev:latest
+    image: project-frontend-dev
     container_name: project-frontend
-    depends_on:
-      - backend
-    environment:
-      # Point your FE to the API during dev (if you reference it)
-      # In React code, read import.meta.env.VITE_API_URL
-      - VITE_API_URL=http://localhost:5713
+    command: sh -lc '[ -d node_modules ] || npm ci; npm run dev -- --host'
     ports:
       - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     restart: unless-stopped
+
+volumes:
+  db_data:
