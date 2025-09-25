@@ -38,6 +38,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     restart: unless-stopped
+    # npx prisma migrate deploy;
     command: >
       sh -lc '
         [ -d node_modules ] || npm ci;

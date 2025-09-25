@@ -1,23 +1,18 @@
-import {
-  QueryClient,
-  QueryClientProvider
-} from '@tanstack/react-query'
 import { RouterProvider } from 'react-router'
 import { AppRouter } from '@router'
 import { AuthProvider } from 'security/AuthProvider'
 import { BackendProvider } from 'hooks/BackendProvider'
-
-const queryClient = new QueryClient()
+import useAuthRefresh from 'hooks/useAuthRefresh'
 
 function App() {
+  useAuthRefresh()
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BackendProvider>
-          <RouterProvider router={AppRouter} />
-        </BackendProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <BackendProvider>
+        <RouterProvider router={AppRouter} />
+      </BackendProvider>
+    </AuthProvider>
   )
 }
 

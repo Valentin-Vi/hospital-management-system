@@ -35,11 +35,11 @@ class AuthService {
         error: 'Email not found.'
       }
     }
-    
+
     if(!await compare(password, user.password)) {
       return {
         success: false,
-        error: 'Incorrect password.'
+        error: `Incorrect password.`
       }
     };
 

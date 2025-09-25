@@ -18,7 +18,7 @@ export default function LoginPage() {
 
   async function handleLogin() {
     if(isValidEmail && isValidPassword) {
-      if((await login({ email, password })).success) {
+      if((await login({ email, password })).ok) {
         navigate('/services/home')
       }
     }

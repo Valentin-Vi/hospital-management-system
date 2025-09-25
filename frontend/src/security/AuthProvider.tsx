@@ -1,166 +1,89 @@
-import { UserTypeEnumSchema } from "@models/schemas";
 import type { TLoginParams, TSignupParams, TUserInfoSchema } from '@security/schemas'
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { Result } from "utils/types";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { LoginResponseBodySchema } from "./schemas/LoginSchema";
-import type { TAuthRoutes } from "./types/TAuthRoutes";
-import { LoadingPage } from "@pages";
-
-const defaultUserInfo = {
-  email: '',
-  firstname: '',
-  lastname: '',
-  type: 'VISITOR' // UserTypeEnumSchema.Enum['VISITOR']
-}
+import fetchAuth from './fetchAuth';
+import type { TLoginResult } from './types/TAuthResults';
+import { z } from 'zod';
 
 export type TAuthContext = {
-  user: TUserInfoSchema,
-  isLoading: boolean,
-  signup: (userInfo: TSignupParams) => Promise<boolean>,
-  login: (userInfo: TLoginParams) => Promise<Result<null>>,
-  refresh: () => Promise<Result<TUserInfoSchema>>,
-  logout: () => Promise<boolean>
+  user: TUserInfoSchema | undefined,
+  setUser: React.Dispatch<React.SetStateAction<TUserInfoSchema | undefined>>,
+  login: (params: TLoginParams) => Promise<TLoginResult>,
+  signup: (userInfo: TSignupParams) => Promise<{
+    ok: boolean,
+    message: string
+  }>,
+  logout: () => Promise<{
+    ok: boolean,
+  }>
 }
 
 const AuthContext = createContext<TAuthContext>({} as TAuthContext);
 
-const AUTH_URL = "http://localhost:3010/auth"
-
 export function AuthProvider({ children }: { children?: ReactNode }) {
-  const [user, setUser] = useState<TUserInfoSchema>(defaultUserInfo)
-  
-  const { isLoading, data: userData } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const response = await fetch(AUTH_URL + '/refresh', {
-        method: 'POST',
-        credentials: 'include'
-      });
-
-      if(response.ok === false) {
-        logout()
-        throw new Error(`Error raised when authenticating user.`)
-      }
-
-      const { userData } = await response.json();
-      return userData as TUserInfoSchema
-    },
-    refetchInterval: 900_000
+  const queryClient = useQueryClient()
+  const [user, setUser] = useState<TUserInfoSchema>({
+    firstname: '',
+    lastname: '',
+    type: 'VISITOR',
+    email: ''
   })
 
-  useEffect(() => {
-    if(user.type === 'VISITOR' && userData) {
-      setUser(userData)
+  async function login(params: TLoginParams): Promise<TLoginResult> {
+    const response = await fetchAuth('/login', {
+      method: 'POST',
+      body: JSON.stringify(params)
+    });
+
+    const json = await response.json();
+    const parsed = LoginResponseBodySchema.safeParse(json);
+
+    if(!response.ok || !parsed.success) {
+      const message = parsed.success ? (parsed.data.message ?? 'Login failed') : 'Invalid log-in schema';
+      return { ok: false, message }
     }
-  }, [ userData ])
+
+    const userData = parsed.data.data;
+    setUser(userData);
+
+    queryClient.setQueryData(['me'], userData)
+
+    return { ok: true, userData };
+  }
   
-  console.log(isLoading)
-  if(isLoading) {
-    return <LoadingPage />
-  }
-
-  async function api(route: TAuthRoutes, options: RequestInit): Promise<Response> {
-    let response = undefined;
-    options.credentials = options.credentials || "include";
-    options.mode = options.mode || "cors";
-    options.headers = {
-      ...options.headers,
-      'Content-Type': 'application/json'
-    }
-
-    response = await fetch(AUTH_URL + route, options)
-    if(response.status === 401) {
-      response = await fetch(AUTH_URL + '/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      })
-      if(response.status !== 200) {
-        response = await fetch(AUTH_URL + route, options);
-      } else {
-        throw new Error('Session expired.')
-      }
-    }
-    return response;
-  }
-
-  async function signup(userInfo: TSignupParams): Promise<boolean> {
-    const response = await api('/signup', {
+  async function signup(userInfo: TSignupParams) {
+    const response = await fetchAuth('/signup', {
       method: 'POST',
-      body: JSON.stringify({
-        email: userInfo.email,
-        password: userInfo.password,
-        firstname: userInfo.firstname,
-        lastname: userInfo.lastname
-      })
+      body: JSON.stringify(userInfo)
     })
-    return response.ok
-  }
+    
+    const json = await response.json();
 
-  async function login(userInfo: TLoginParams): Promise<Result<null>> {
-    const response = await api('/login', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: userInfo.email,
-        password: userInfo.password
-      })
-    })
-
-    const parseResult = LoginResponseBodySchema.safeParse(await response.json());
-
-    if(parseResult.success === false) {
-      return {
-        success: false,
-        error: parseResult.error.message
-      };
-    }
-
-    setUser(parseResult.data.userData)
+    const parseResult = z.object({
+      message: z.string()
+    }).safeParse(json);
 
     return {
-      success: true,
-      data: null
+      ok: response.ok,
+      message: parseResult.data?.message ?? 'Sign up error'
     }
-
   }
 
-  async function refresh(): Promise<Result<TUserInfoSchema>> {
-    const response = await api('/refresh', {
-      method: 'POST'
-    })
-    if(response.ok) {
-      const responseBody = await response.json();
-
-      return {
-        success: true,
-        data: responseBody.userData
-      }
-    }
+  async function logout() {
     return {
-      success: false,
-      error: response.status.toString()
+      ok: (await fetchAuth('/logout', {
+        method: 'POST'
+      })).ok
     }
-  }
-
-  async function logout(): Promise<boolean> {
-    const response = await api('/logout', {
-      method: 'POST'
-    })
-    return response.ok
-  }
-
-  if(isLoading) {
-    return <h1>Loading...</h1>
   }
 
   return (
     <AuthContext.Provider value={{
       user,
-      isLoading,
+      setUser,
       signup,
       login,
-      refresh,
       logout
     }}>
       { children }

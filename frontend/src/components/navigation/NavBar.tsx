@@ -10,7 +10,7 @@ export default function NavBar() {
   const loc = useLocation();
 
   function handleProfileRedirect() {
-      user.type !== 'VISITOR' ? nav('/profile') : nav('/login');
+      user?.type !== 'VISITOR' ? nav('/profile') : nav('/login');
   }
 
   return (
@@ -22,8 +22,7 @@ export default function NavBar() {
       >
         {
           buttons.map((btn, idx) => (
-            btn.allowedRoles.includes(user.type) ?
-          
+            user?.type ? btn.allowedRoles.includes(user.type) ?
               <button
                 type="button"
                 key={idx}
@@ -41,8 +40,8 @@ export default function NavBar() {
               >                            
                 {btn.icon}
               </button>
-            : null
-          ))
+            : null : null
+          )) 
         }
       </div>
       <div>

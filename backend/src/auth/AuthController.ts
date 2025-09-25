@@ -58,7 +58,7 @@ class AuthController {
       const signupInfo: any = request.body;
       const parseResult = SignupInfoSchema.safeParse(signupInfo)
       if(parseResult.success === false) {
-        return response.status(400).send({
+        return response.status(400).json({
           message: 'signupInfo is malformed or not present.',
           error: parseResult.error
         });
@@ -70,18 +70,18 @@ class AuthController {
       );
 
       if(signedUser.success) {
-        return response.status(200).send({
+        return response.status(200).json({
           message: 'Signup successful.'
         });
       } else {
-        return response.status(400).send({
+        return response.status(400).json({
           message: 'Email already exists.'
         });
       }
 
     } catch(err) {
       console.error(err);
-      return response.status(500).send({
+      return response.status(500).json({
         message: 'Internal server error.'
       });
     };
@@ -93,13 +93,13 @@ class AuthController {
 
       const parseResult = LoginInfoSchema.safeParse(loginInfo);
       if(parseResult.success === false) {
-        return response.status(400).send({
+        return response.status(400).json({
           message: 'loginInfo is malformed or not present.'
         });
       }
 
       const loginResult = await this.service.login(parseResult.data)
-      if (loginResult.success === false) return response.status(401).send({
+      if (loginResult.success === false) return response.status(401).json({
         message: loginResult.error
       });
       
@@ -135,7 +135,7 @@ class AuthController {
 
       return response.status(200).json({
         message: 'LogIn successful.',
-        userData: {
+        data: {
           email: user.email,
           firstname: user.firstname,
           lastname: user.lastname,
@@ -144,26 +144,26 @@ class AuthController {
       });
     } catch(err) {
       console.error(err);
-      return response.status(500).send({
+      return response.status(500).json({
         message: 'Internal server error.'
       });
     }
   }
 
-  async refresh(request: Request, response: Response): Promise<Response | undefined> {
+  async refresh(request: Request, response: Response): Promise<Response> {
     try {
       const refreshToken = request.cookies.refreshToken;
       const verifyResult = this.#verifyCookie(refreshToken)
 
       if(refreshToken === undefined) {
-        return response.status(400).send({
+        return response.status(400).json({
           message: 'refreshToken not provided'
         })
       }
 
       if(verifyResult.success === false) {
         this.#clearAuthCookies(response)
-        return response.status(401).send({
+        return response.status(401).json({
           message: verifyResult.error
         })
       }
@@ -171,7 +171,7 @@ class AuthController {
       const refreshResult = await this.service.refresh(verifyResult.data)
       if (refreshResult.success === false) {
         this.#clearAuthCookies(response);
-        return response.status(400).send({
+        return response.status(400).json({
           message: refreshResult.error
         });
       }
@@ -192,7 +192,7 @@ class AuthController {
 
       return response.status(200).json({
         message: "accessToken cookie refreshed successfully.",
-        userData: {
+        data: {
           email: user.email,
           firstname: user.firstname,
           lastname: user.lastname,
@@ -201,7 +201,7 @@ class AuthController {
       })
     } catch(err) {
       console.error(err);
-      return response.status(500).send({
+      return response.status(500).json({
         message: 'Internal server error.'
       });
     }
@@ -210,12 +210,12 @@ class AuthController {
   async logout(request: Request, response: Response): Promise<Response> {
     try {
       this.#clearAuthCookies(response)
-      return response.status(200).send({
+      return response.status(200).json({
         message: "Logged out Successfully."
       })
     } catch(err) {
       console.error(err)
-      return response.status(500).send({
+      return response.status(500).json({
         message: "Internal server error."
       })
     }

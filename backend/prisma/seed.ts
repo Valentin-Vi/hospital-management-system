@@ -1,54 +1,54 @@
+// backend/prisma/seed.ts
 import { PrismaClient } from "@prisma/client";
-import hashPassword from '../src/utils/hashPassword'
+import hashPassword from "../src/utils/hashPassword";
+import bcrypt from "bcrypt";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
+
+const ADMIN_EMAIL = "admin@mail.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Admin123*";
 
 async function main() {
-  
-
   const user = await prisma.user.upsert({
-    where: { userId: 1 },
+    where: { email: ADMIN_EMAIL },
     create: {
-      email: "admin@mail.com",
-      password: hashPassword('Admin123*'),
-      firstname: 'admin',
-      lastname: 'istrador',
-      type: 'ADMIN',
-      enabled: true
+      email: ADMIN_EMAIL,
+      password: hashPassword(ADMIN_PASSWORD),
+      firstname: "admin",
+      lastname: "istrador",
+      type: "ADMIN",
+      enabled: true,
     },
     update: {
-      email: "admin@mail.com",
-      password: hashPassword('Admin123*'),
-      firstname: 'admin',
-      lastname: 'istrador',
-      type: 'ADMIN',
-      enabled: true  
+      firstname: "admin",
+      lastname: "istrador",
+      type: "ADMIN",
+      enabled: true,
+    },
+  });
+
+  if (process.env.ADMIN_PASSWORD) {
+    const same = bcrypt.compareSync(ADMIN_PASSWORD, user.password);
+    if (!same) {
+      await prisma.user.update({
+        where: { userId: user.userId },
+        data: { password: hashPassword(ADMIN_PASSWORD) },
+      });
     }
-  })
+  }
 
   await prisma.admin.upsert({
     where: { userId: user.userId },
     create: {
-      users: {
-        connect: { userId: 1 }
-      }
+      users: { connect: { userId: user.userId } },
     },
     update: {
-      users: {
-        connect: { userId: 1 }
-      }
-    }
-  })
+      users: { connect: { userId: user.userId } },
+    },
+  });
 }
 
-
 main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (err) => {
-    console.error(err);
+  .finally(async () => {
     await prisma.$disconnect();
-    process.exit(1)
-  })
-  
+  });

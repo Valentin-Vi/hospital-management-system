@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "path": "^0.12.7",
     "zod": "^3.25.72"
+  },
+  "scripts": {
+    "start": "sudo docker compose up",
+    "stop": "sudo docker compose down -v"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.1"
   }
 }

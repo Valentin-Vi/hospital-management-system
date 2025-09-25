@@ -27,7 +27,7 @@ export default createBrowserRouter([
     ]
   }, {
     path: '/services',
-    element: <ProtectedRoute authorizedRoles={['CLIENT']} />,
+    element: <ProtectedRoute authorizedRoles={['ADMIN']} />,
     children: [
       {
         path: '/services',

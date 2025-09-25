@@ -18,6 +18,6 @@ export type TLoginParams = z.infer<typeof LoginParamsSchema>
 
 export const LoginResponseBodySchema = z.object({
   message: z.string(),
-  userData: UserDataSchema
+  data: UserDataSchema
 })
 export type TLoginResponseBody = z.infer<typeof LoginResponseBodySchema>
