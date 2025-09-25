@@ -1,0 +1,10 @@
+frontend_OLD
+node_modules
+final_project.code-workspace
+
+backend/node_modules
+backend/dist
+
+frontend/node_modules
+frontend/dist
+
