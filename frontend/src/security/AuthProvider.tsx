@@ -5,7 +5,6 @@ import { LoginResponseBodySchema } from "./schemas/LoginSchema";
 import fetchAuth from './fetchAuth';
 import type { TLoginResult } from './types/TAuthResults';
 import { z } from 'zod';
-import useAuthRefresh from 'hooks/useAuthRefresh';
 import RefreshResponseBodySchema from './schemas/RefreshSchema';
 
 export type TAuthContext = {
@@ -48,17 +47,14 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
 
       if(!response.ok || !parsed.success) {
         const message = parsed.success ? (parsed.data.message ?? 'Refresh failed') : 'Invalid refresh schema';
-        setUser(defaultUserData)
+        logout()
         return { ok: false, message }
       }
 
       const userData = parsed.data.data;
       setUser(userData);
 
-      return {
-        ok: true,
-        userData
-      }
+      return { ok: true, userData }
     }
   })
 
@@ -103,10 +99,14 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
   }
 
   async function logout() {
+    const response = await fetchAuth('/logout', {
+      method: 'POST'
+    })
+
+    setUser(defaultUserData)
+
     return {
-      ok: (await fetchAuth('/logout', {
-        method: 'POST'
-      })).ok
+      ok: response.ok
     }
   }
 
