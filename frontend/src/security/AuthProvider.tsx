@@ -1,14 +1,16 @@
 import type { TLoginParams, TSignupParams, TUserInfoSchema } from '@security/schemas'
 import { createContext, useContext, useState, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoginResponseBodySchema } from "./schemas/LoginSchema";
 import fetchAuth from './fetchAuth';
 import type { TLoginResult } from './types/TAuthResults';
 import { z } from 'zod';
+import useAuthRefresh from 'hooks/useAuthRefresh';
+import RefreshResponseBodySchema from './schemas/RefreshSchema';
 
 export type TAuthContext = {
   user: TUserInfoSchema | undefined,
-  setUser: React.Dispatch<React.SetStateAction<TUserInfoSchema | undefined>>,
+  setUser: React.Dispatch<React.SetStateAction<TUserInfoSchema>>,
   login: (params: TLoginParams) => Promise<TLoginResult>,
   signup: (userInfo: TSignupParams) => Promise<{
     ok: boolean,
@@ -19,15 +21,45 @@ export type TAuthContext = {
   }>
 }
 
+const defaultUserData = {
+  email: '',
+  firstname: '',
+  lastname: '',
+  type: 'VISITOR' as const // UserTypeEnumSchema.Enum['VISITOR']
+};
+
 const AuthContext = createContext<TAuthContext>({} as TAuthContext);
 
 export function AuthProvider({ children }: { children?: ReactNode }) {
   const queryClient = useQueryClient()
-  const [user, setUser] = useState<TUserInfoSchema>({
-    firstname: '',
-    lastname: '',
-    type: 'VISITOR',
-    email: ''
+  const [user, setUser] = useState<TUserInfoSchema>(defaultUserData)
+
+  useQuery({
+    queryKey: ['auth', 'refresh'],
+    refetchInterval: 900_000,
+    refetchIntervalInBackground: true,
+    queryFn: async () => {
+      const response = await fetchAuth('/refresh', {
+        method: 'POST'
+      })
+
+      const json = await response.json();
+      const parsed = RefreshResponseBodySchema.safeParse(json);
+
+      if(!response.ok || !parsed.success) {
+        const message = parsed.success ? (parsed.data.message ?? 'Refresh failed') : 'Invalid refresh schema';
+        setUser(defaultUserData)
+        return { ok: false, message }
+      }
+
+      const userData = parsed.data.data;
+      setUser(userData);
+
+      return {
+        ok: true,
+        userData
+      }
+    }
   })
 
   async function login(params: TLoginParams): Promise<TLoginResult> {

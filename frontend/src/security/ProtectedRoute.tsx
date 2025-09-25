@@ -4,21 +4,21 @@ import type { TUserTypeEnumSchema } from '@models/schemas';
 import { LoadingPage } from '@pages';
 
 export type Props = {
-    authorizedRoles: TUserTypeEnumSchema[],
+  authorizedRoles: TUserTypeEnumSchema[],
 };
 
 export default function ProtectedRoute({ authorizedRoles }: Props) {
-    const { user } = useAuth();
+  const { user } = useAuth();
 
-    console.log(user?.type, authorizedRoles)
+  console.log(user?.type)
 
-    if(!user) {
-        return <LoadingPage />
-    }
+  if(!user) {
+      return <LoadingPage />
+  }
 
-    if (!authorizedRoles.includes(user.type)) {
-        return <Navigate to='/error/unauthorized' replace />
-    };
-    
-    return <Outlet />
+  if (!authorizedRoles.includes(user.type)) {
+      return <Navigate to='/error/unauthorized' replace />
+  };
+  
+  return <Outlet />
 };
