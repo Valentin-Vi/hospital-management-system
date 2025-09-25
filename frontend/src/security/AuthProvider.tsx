@@ -9,7 +9,7 @@ import RefreshResponseBodySchema from './schemas/RefreshSchema';
 
 export type TAuthContext = {
   user: TUserInfoSchema | undefined,
-  setUser: React.Dispatch<React.SetStateAction<TUserInfoSchema>>,
+  setUser: React.Dispatch<React.SetStateAction<TUserInfoSchema | undefined>>,
   login: (params: TLoginParams) => Promise<TLoginResult>,
   signup: (userInfo: TSignupParams) => Promise<{
     ok: boolean,
@@ -31,7 +31,7 @@ const AuthContext = createContext<TAuthContext>({} as TAuthContext);
 
 export function AuthProvider({ children }: { children?: ReactNode }) {
   const queryClient = useQueryClient()
-  const [user, setUser] = useState<TUserInfoSchema>(defaultUserData)
+  const [user, setUser] = useState<TUserInfoSchema | undefined>(undefined)
 
   useQuery({
     queryKey: ['auth', 'refresh'],
