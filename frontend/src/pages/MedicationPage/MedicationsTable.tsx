@@ -43,8 +43,12 @@ export default function MedicationsTable({ data }: TMedicationsTableParams) {
     }
   })
 
-  function handleRowSelection() {
-    
+  function handleRowSelection(rowId: string) {
+    if (rowSelection[rowId]) {
+      setRowSelection({})
+    } else {
+      setRowSelection({ [rowId]: true })
+    }
   }
 
   return (
@@ -198,8 +202,9 @@ export default function MedicationsTable({ data }: TMedicationsTableParams) {
         <tbody>
           {table.getRowModel().rows.map((row) => (
             <tr
-              className="hover:bg-blue-50"
+              className={`select-none ${rowSelection[row.id] ? 'ring-1 ring-orange-200 bg-orange-100 hover:bg-orange-100' : ''}`}
               key={row.id}
+              onClick={() => { handleRowSelection(row.id) }}
             >
               {row.getVisibleCells().map((cell) => (
                 <td
