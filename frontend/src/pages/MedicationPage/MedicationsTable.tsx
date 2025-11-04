@@ -9,13 +9,14 @@ import { MdKeyboardDoubleArrowRight } from "react-icons/md";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { HiOutlineTrash } from "react-icons/hi";
 import { HiOutlinePencilAlt } from "react-icons/hi";
-
+import { Button } from "@components/ui/button";
 
 type TMedicationsTableParams = {
-  data: TUserSchema[]
+  tableData: TUserSchema[],
+  setTableData: React.Dispatch<React.SetStateAction<TUserSchema[]>>
 }
 
-export default function MedicationsTable({ data }: TMedicationsTableParams) {
+export const MedicationTable = ({ tableData, setTableData }: TMedicationsTableParams) => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [pagination, setPagination] = useState<PaginationState>({
@@ -24,19 +25,35 @@ export default function MedicationsTable({ data }: TMedicationsTableParams) {
   })
 
   const table = useReactTable<TUserSchema>({
-    data,
+    data: tableData,
     columns,
     
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-
+ 
     enableRowSelection: true,
 
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     
+    meta: {
+      updateData: (rowIndex: number, columnId: number, value: any) => {
+        setTableData(old =>
+          old.map((row, index) => {
+            if (index === rowIndex) {
+              return {
+                ...old[rowIndex]!,
+                [columnId]: value,
+              }
+            }
+            return row
+          })
+        )
+      },
+    },
+
     state: {
       pagination,
       sorting
@@ -51,144 +68,78 @@ export default function MedicationsTable({ data }: TMedicationsTableParams) {
     }
   }
 
+  function onDisableRowPress() {
+    const rowId = +Object.keys(rowSelection)[0]
+
+    console.log(rowId)
+    console.log(tableData[rowId]['enabled'])
+
+    setTableData(prev => {
+      prev[rowId]['enabled'] = !prev[rowId]['enabled'];
+      return prev
+    })
+  }
+
   return (
     <div>
-      <div
-      className='
-        flex flex-row
-      '>
-        <div
-        className='
-          flex flex-row
-        '>
+      <div className='flex flex-row'>
+        <div className='flex flex-row'>
 
-          <button className='
-            rounded
-            flex flex-row
-            text-xs
-            h-5
-            p-0.5 ps-1 pe-1
-            bg-gray-100 text-gray-700
-            hover:bg-yellow-100 hover:text-yellow-900
-          '>
-            <span className='
-              flex items-center justify-center
-              mr-0.5
-            '>
-              <HiOutlinePencilAlt />
+          <Button variant="skeleton" Icon={HiOutlinePencilAlt} displayText="Update" onClick={() => null}>
+            
+          </Button>
+          {/* <button className='rounded flex flex-row text-xs h-5 p-0.5 ps-1 pe-1 bg-gray-100 text-gray-700 hover:bg-yellow-100 hover:text-yellow-900'>
+            <span className='flex items-center justify-center mr-0.5'>
             </span>
-            <span className=''>Update</span>
-          </button>
+            <span>Update</span>
+          </button> */}
 
-          <button className='
-            flex flex-row
-            rounded
-            text-xs
-            h-5
-            bg-gray-100 text-gray-700
-            ml-1 p-0.5 ps-1 pe-1
-            hover:bg-red-100 hover:text-red-900
-          '>
-            <span className='
-              flex items-center justify-center
-              mr-0.5
-            '>
+          <button className='flex flex-row rounded text-xs h-5 bg-gray-100 text-gray-700 ml-1 p-0.5 ps-1 pe-1 hover:bg-red-100 hover:text-red-900' onClick={onDisableRowPress}>
+            <span className='flex items-center justify-center mr-0.5'>
               <HiOutlineTrash />
             </span>
-            <span className=''>Delete</span>
+            <span className=''>Disable</span>
           </button>
 
-          <button className='
-            flex flex-row
-            rounded
-            text-xs
-            h-5
-            ml-1 p-0.5 ps-1 pe-1
-            bg-gray-100 text-gray-700
-            hover:bg-green-100 hover:text-green-900
-          '>
-            <span className='
-              flex items-center justify-center
-              mr-0.5
-            '>
+          <button className='flex flex-row rounded text-xs h-5 ml-1 p-0.5 ps-1 pe-1 bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-900'>
+            <span className='flex items-center justify-center mr-0.5'>
               <AiOutlinePlusCircle />
             </span>
-            <span className=''>Create</span>
+            <span>Create</span>
           </button>
         </div>
 
         <div className='flex flex-row w-full justify-end '>
           <div>
-            <button
-              className="
-                mr-1
-                rounded-[50%]
-                text-gray-400 bg-gray-100
-                hover:text-blue-950 hover:bg-sky-100"
-            >
+            <button className="mr-1 rounded-[50%] text-gray-400 bg-gray-100 hover:text-blue-950 hover:bg-sky-100">
               <MdKeyboardDoubleArrowLeft />
             </button>
           </div>
           <div>
-            <button
-              className="
-                mr-1
-                rounded-[50%]
-                text-gray-400 bg-gray-100
-                hover:text-blue-950 hover:bg-sky-100"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
+            <button className="mr-1 rounded-[50%] text-gray-400 bg-gray-100 hover:text-blue-950 hover:bg-sky-100" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
               <MdKeyboardArrowLeft />
             </button>
           </div>
 
           <div>
-            <button
-              className="
-                mr-1
-                rounded-[50%]
-                text-gray-400 bg-gray-100
-                hover:text-blue-950 hover:bg-sky-100"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
+            <button className="mr-1 rounded-[50%] text-gray-400 bg-gray-100 hover:text-blue-950 hover:bg-sky-100" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
               <MdKeyboardArrowRight />
             </button>
           </div>
           <div>
-            <button
-              className="
-                mr-1
-                rounded-[50%]
-                text-gray-400 bg-gray-100
-                hover:text-blue-950 hover:bg-sky-100"
-              onClick={() => table.lastPage()}
-              disabled={pagination.pageIndex === (table.getPageCount() - 1)}
-            >
+            <button className="mr-1 rounded-[50%] text-gray-400 bg-gray-100 hover:text-blue-950 hover:bg-sky-100" onClick={() => table.lastPage()} disabled={pagination.pageIndex === (table.getPageCount() - 1)}>
               <MdKeyboardDoubleArrowRight />
             </button>
           </div>
         </div>
       </div>
-      <table
-        className="w-full border-black text-xs"
-      >
+      <table className="w-full border-black text-xs">
         <thead>
           {table.getHeaderGroups().map((hg) => (
-            <tr
-              key={hg.id}
-              className="border-b-1 border-black"
-            >
+            <tr key={hg.id} className="border-b-1 border-blue-900 bg-blue-300">
               {hg.headers.map((h) => (
-                <th
-                  key={h.id}
-                  colSpan={h.colSpan}
-                  onClick={h.column.getToggleSortingHandler()}
-                  className="border-[0.5px] border-black"
-                >
-                  {h.isPlaceholder ?
-                    null : 
+                <th key={h.id} colSpan={h.colSpan} onClick={h.column.getToggleSortingHandler()} className="border-[0.5px] border-black">
+                  {h.isPlaceholder ? null : 
                     flexRender(
                       h.column.columnDef.header,
                       h.getContext()
@@ -201,21 +152,9 @@ export default function MedicationsTable({ data }: TMedicationsTableParams) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr
-              className={`select-none ${rowSelection[row.id] ? 'ring-1 ring-orange-200 bg-orange-100 hover:bg-orange-100' : ''}`}
-              key={row.id}
-              onClick={() => { handleRowSelection(row.id) }}
-            >
+            <tr className={`select-none ${rowSelection[row.id] ? 'ring-1 ring-orange-200 bg-orange-100 hover:bg-orange-100' : ''}`} key={row.id} onClick={() => { handleRowSelection(row.id) }}>
               {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  className="
-                    pl-1 pr-1
-                    text-left
-                    border-[0.5px] border-black
-                    text-xs
-                  "
-                >
+                <td key={cell.id} className="pl-1 pr-1 text-left border-[0.5px] border-black text-xs">
                   { flexRender(cell.column.columnDef.cell, cell.getContext()) }
                 </td>
               ))}
@@ -225,4 +164,4 @@ export default function MedicationsTable({ data }: TMedicationsTableParams) {
       </table>
     </div>
   )
-}
+};

@@ -71,7 +71,7 @@ class UserDal {
     return new User(prismaUser)  
   }
 
-  async getPaginatedUsers({ page, limit }: TGetPaginatedUsersParams): Promise<User[] | []> {
+  async getPaginatedUsers({ page, limit }: TGetPaginatedUsersParams): Promise<User[]> {
     
     const prismaUsers = await this.prisma.user.findMany({
       skip: page * limit,

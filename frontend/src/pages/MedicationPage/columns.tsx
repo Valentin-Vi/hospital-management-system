@@ -1,5 +1,6 @@
 import type { TUserSchema } from "@models/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
+import { capitalize } from "utils"
 
 const columnHelper = createColumnHelper<TUserSchema>()
 
@@ -18,11 +19,11 @@ export default [
   }),
   columnHelper.accessor('firstname', {
     header: 'Firstname',
-    cell: info => info.getValue(),
+    cell: info => capitalize(info.getValue().toString()),
   }),
   columnHelper.accessor('lastname', {
     header: 'Lastname',
-    cell: info => info.getValue(),
+    cell: info => capitalize(info.getValue().toString()),
   }),
   columnHelper.accessor('enabled', {
     header: 'Enabled',

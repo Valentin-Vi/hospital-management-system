@@ -1,5 +1,7 @@
-import type { TUserSchema } from "@models/schemas"
+import { UserSchema, type TUserSchema } from "@models/schemas"
+import type Medication from "models/Medication"
 import { createContext, useContext, type ReactNode } from "react"
+import z from "zod"
 
 export type TBackendContext = {
   getPaginatedUsers: (page: number, limit: number) => Promise<TUserSchema[]>
@@ -19,12 +21,10 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
       }
     });
     const responseBody = await response.json();
-    const users = responseBody.users ?? []
-    let parsedUsers = [];
-    for (const user of users) {
-      parsedUsers.push(JSON.parse(user))
-    }
-    return parsedUsers
+    const users = JSON.parse(responseBody.users);
+    const result = UserSchema.array().safeParse([users])
+
+    return result.data ?? []
   }
 
   return (

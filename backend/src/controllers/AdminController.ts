@@ -37,20 +37,14 @@ class AdminController {
 
       const { page, limit } = parsedRequestBody.data
 
-      let users = await this.service.getPaginatedUsers({
-        page: page,
-        limit: limit
-      })
-
-      let stringifiedUsers = []
-      for (const user of users) {
-        const parsedUser = user.toJSON();
-        stringifiedUsers.push(parsedUser)
-      }
+      
 
       return response.status(200).json({
         message: "Request successful.",
-        users: stringifiedUsers
+        users: await this.service.getPaginatedUsers({
+          page: page,
+          limit: limit
+        })
       });
     } catch(err) {
       console.error(err);

@@ -3,60 +3,65 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@security';
 import { useLocation } from 'react-router';
 import buttons from './NavbarBottons';
+import { Button } from "@components/ui/button";
 
 export default function NavBar() {
   const { user } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
 
-  function handleProfileRedirect() {
-      user?.type !== 'VISITOR' ? nav('/profile') : nav('/login');
+  const handleNavButtonRedirect = (path: string) => {
+    nav(path);
+  }
+
+  const validateAuthorization = (authorizedRoles: string[]) => {
+    if(user?.type === undefined) return false;
+    return authorizedRoles.includes(user.type);
+  }
+
+  const handleProfileRedirect = () => {
+    nav('/profile');
+  }
+
+  const isCurrentRoute = (route: string) => {
+    return loc.pathname === route;
+  }
+
+  const styleNavButton = (route: string) => {
+    if(isCurrentRoute(route)) {
+      return 'black';
+    }
+    return 'white';  
   }
 
   return (
-    <div
-      className="w-[100%] h-[28px] flex flex-row justify-between items-center overflow-hidden shadow-sm shadow-gray-400 bg-blue-600 rounded-md"
-    >
-      <div
-        className='flex flex-row'
-      >
+    <div className="flex flex-row w-full h-8 justify-between items-center bg-black rounded-md pl-2 pr-2 pt-1 pb-1">
+      <div className="flex flex-row gap-1">
         {
-          buttons.map((btn, idx) => (
-            user?.type ? btn.allowedRoles.includes(user.type) ?
-              <button
-                type="button"
-                key={idx}
-                onClick={() => nav(btn.route)}
-                className={`
-                  flex-row flex
-                  text-xs
-                  rounded-[20%]
-                  ml-1 m3-1
-                  h-5 w-5
-                  items-center justify-center
-                  ${loc.pathname === btn.route ? 'text-blue-950 bg-blue-50' : 'hover:text-white text-sky-200 hover:bg-blue-500'}
-                `}
-                // className={`text-xs flex-row flex rounded-[50%] hover:bg-white ml-1 m3-1 h-5 w-5 hover:shadow-sm hover:text-black items-center justify-center ${loc.pathname === btn.route ? 'text-white' : 'text-slate-400'}`}
-              >                            
-                {btn.icon}
-              </button>
-            : null : null
-          )) 
+          buttons.map((button, index) => (
+            validateAuthorization(button.allowedRoles) ? (
+              <Button variant={styleNavButton(button.route)} shape='round' Icon={button.icon} displayText={button.title} key={index} onClick={() => handleNavButtonRedirect(button.route)} />
+            ) : (null)
+          ))
         }
       </div>
       <div>
-        <button
-          type="button"
-          key="profile"
-          onClick={handleProfileRedirect}
-          className={`text-xs rounded-[20%] ml-1 mr-1 flex-row flex items-center justify-center ${loc.pathname === '/profile' ? 'text-blue-950 bg-white' : 'text-white hover:bg-white hover:text-blue-950'}`}
-        >
-          <div
-            className="m-1"
-          >
-            <FaCircleUser />
-          </div>
-        </button>
+        <Button variant="white" shape='round' Icon={FaCircleUser} displayText="Profile" onClick={() => nav('/profile')} />
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="w-full h-8 flex flex-row justify-between items-center overflow-hidden shadow-sm shadow-gray-400 bg-black rounded-md pl-2 pr-2 pt-1 pb-1">
+      <div className='flex flex-row gap-1'>
+        { buttons.map((btn, idx) => (
+          user?.type ? btn.allowedRoles.includes(user.type) ?
+            <Button className={`${loc.pathname === btn.route ? 'border-2 border-white bg-white text-black' : ''}`} key={idx} Icon={btn.icon} variant='white' displayText={btn.title} shape='round' onClick={() => nav(btn.route)} />
+          : null : null
+        ))}
+      </div>
+      <div>
+        <Button className={`${loc.pathname === '/profile' ? 'border-2 border-white' : ''}`} Icon={FaCircleUser} variant="white" displayText="Profile" shape='round' onClick={handleProfileRedirect} />
       </div>
     </div>
   );

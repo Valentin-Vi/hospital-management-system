@@ -4,11 +4,16 @@ import LoginPage from "pages/LoginPage/LoginPage";
 import Layout from "@components/composition/Layout";
 import ErrorPage from "pages/ErrorPage/ErrorPage";
 import MedicationPage from "pages/MedicationPage/MedicationPage";
+import { Button } from "@components/ui/button";
+import { FaLeaf } from "react-icons/fa6";
 
 export default createBrowserRouter([
   {
     path: '/',
     element: <Navigate to='/auth/login'/>
+  }, {
+    path: '/test',
+    element: <Button displayText="Hello" shape={'chip'} variant={'red'} onClick={() => null} Icon={FaLeaf} />
   }, {
     path: '/auth',
     element: <ProtectedRoute authorizedRoles={['VISITOR']} />,
