@@ -1,20 +1,18 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import ProtectedRoute from "security/ProtectedRoute";
-import LoginPage from "pages/LoginPage/LoginPage";
+import { LoginPage, ErrorPage, MedicalReport, MedicationPage } from "@pages";
 import Layout from "@components/composition/Layout";
-import ErrorPage from "pages/ErrorPage/ErrorPage";
-import MedicationPage from "pages/MedicationPage/MedicationPage";
-import { Button } from "@components/ui/button";
-import { FaLeaf } from "react-icons/fa6";
+import { SearchField } from "@components/ui/search-field";
 
 export default createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to='/auth/login'/>
+    element: <Navigate to='/auth/login'/>,
+    errorElement: <Navigate to='/error' />
   }, {
     path: '/test',
-    element: <Button displayText="Hello" shape={'chip'} variant={'red'} onClick={() => null} Icon={FaLeaf} />
-  }, {
+    element: <SearchField variant="white_bordered"/>
+  } ,{
     path: '/auth',
     element: <ProtectedRoute authorizedRoles={['VISITOR']} />,
     errorElement: <Navigate to='/error' />,
@@ -41,6 +39,21 @@ export default createBrowserRouter([
           {
             path: '/services/medication',
             element: <MedicationPage />,
+          }
+        ]
+      }
+    ]
+  }, {
+    path: '/report',
+    element: <ProtectedRoute authorizedRoles={['ADMIN']} />,
+    children: [
+      {
+        path: '/report',
+        element: <Layout />,
+        children: [
+          {
+            path: '/report/medical',
+            element: <MedicalReport />
           }
         ]
       }

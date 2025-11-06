@@ -14,7 +14,7 @@ const navbarTitle = {
 const navbarRoutes = {
   inventory: '/inventory',
   medication: '/services/medication',
-  reports: '/reports',
+  reports: '/report/medical',
   visits: '/visits',
 } as const;
 
@@ -38,7 +38,7 @@ const navbarButtons: NavbarButtonsType[] = [
     icon: FaPills
   }, {
     title: 'Reports',
-    route: '/reports',
+    route: '/report/medical',
     allowedRoles: ['DESK', 'ADMIN'],
     icon: BsFileEarmarkBarGraphFill
   }, {

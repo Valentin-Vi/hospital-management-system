@@ -1,33 +1,43 @@
-import type { TUserSchema } from "@models/schemas"
+import type { TMedicationSchema } from "@models/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
 import { capitalize } from "utils"
 
-const columnHelper = createColumnHelper<TUserSchema>()
+const columnHelper = createColumnHelper<TMedicationSchema>()
 
 export default [
-  columnHelper.accessor('userId', {
-    header: 'Id',
-    cell: info => <div className="text-center">{ info.getValue() }</div>,
+  columnHelper.accessor('medication_id', {
+    header: 'ID',
+    cell: info => <div className="text-center">{info.getValue()}</div>,
   }),
-  columnHelper.accessor('type', {
-    header: 'Type',
-    cell: info => <div className="text-center">{ info.getValue() }</div>,
-  }),
-  columnHelper.accessor('email', {
-    header: 'Email',
-    cell: info => info.getValue()
-  }),
-  columnHelper.accessor('firstname', {
-    header: 'Firstname',
+  columnHelper.accessor('name', {
+    header: 'Name',
     cell: info => capitalize(info.getValue().toString()),
   }),
-  columnHelper.accessor('lastname', {
-    header: 'Lastname',
+  columnHelper.accessor('category', {
+    header: 'Category',
     cell: info => capitalize(info.getValue().toString()),
   }),
-  columnHelper.accessor('enabled', {
-    header: 'Enabled',
-    cell: info => JSON.stringify(info.getValue())
+  columnHelper.accessor('expiration_date', {
+    header: 'Expiration Date',
+    cell: info => {
+      const date = info.getValue()
+      return <div className="text-center">{ info.getValue().toString() }</div>
+    },
+  }),
+  columnHelper.accessor('brandName', {
+    header: 'Brand Name',
+    cell: info => capitalize(info.getValue().toString()),
+  }),
+  columnHelper.accessor('genericName', {
+    header: 'Generic Name',
+    cell: info => capitalize(info.getValue().toString()),
+  }),
+  columnHelper.accessor('strength', {
+    header: 'Strength',
+    cell: info => info.getValue(),
+  }),
+  columnHelper.accessor('form', {
+    header: 'Form',
+    cell: info => capitalize(info.getValue().toString()),
   }),
 ]
-

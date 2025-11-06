@@ -30,10 +30,6 @@ class Medication {
     
     return this;
   }
-
-  toJSON(): string {
-    return JSON.stringify(this);
-  }
 };
 
 export default Medication;
