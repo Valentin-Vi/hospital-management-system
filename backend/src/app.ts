@@ -22,10 +22,11 @@ app.use(cors({
 
 // Endpoints
 import { AuthRouter } from '@auth';
-import { AdminRouter } from "@routers"
+import { adminRouter, medicationRouter } from "@routers"
 
 app.use('/auth', AuthRouter)
-app.use('/admin', AdminRouter)
+app.use('/admin', adminRouter)
+app.use('/medication', medicationRouter)
 
 // Port
 const PORT = process.env.PORT;

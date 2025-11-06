@@ -1,5 +1,7 @@
-import AdminRouter from './AdminRouter'
+import adminRouter from './AdminRouter'
+import medicationRouter from './MedicationRouter'
 
 export {
-  AdminRouter
+  adminRouter,
+  medicationRouter
 }
