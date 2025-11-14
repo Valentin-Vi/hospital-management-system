@@ -5,6 +5,7 @@ import { DoctorSchema, TDoctorSchema } from "./DoctorSchema";
 import { DeskSchema, TDeskSchema } from "./DeskSchema";
 import { VisitSchema, TVisitSchema } from "./VisitSchema";
 import { UserSchema, TUserSchema } from "./UserSchema";
+import { MedicationInventory, MedicationSchema, TMedicationInventory, TMedicationSchema } from "./MedicationSchema";
 
 export {
   UserSchema, TUserSchema,
@@ -13,5 +14,6 @@ export {
   DeskSchema, TDeskSchema,
   DoctorSchema, TDoctorSchema,
   ClientSchema, TClientSchema,
-  VisitSchema, TVisitSchema
+  VisitSchema, TVisitSchema,
+  MedicationSchema, TMedicationSchema, MedicationInventory, TMedicationInventory
 }

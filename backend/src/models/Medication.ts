@@ -1,33 +1,38 @@
+import Inventory from "./Inventory";
 
 class Medication {
-  medication_id: number = 0;
+  medicationId: number = 0;
   name: string = 'N/A'
   category: string = 'N/A';
-  expiration_date: Date = new Date();
+  expirationDate: Date = new Date();
   brandName: string = 'N/A';
   genericName: string = 'N/A';
   strength: string = 'N/A';
   form: string = 'N/A';
+  inventory?: Inventory
 
   constructor(
-    medication_id: number,
+    medicationId: number,
     name: string,
     category: string,
-    expiration_date: Date,
+    expirationDate: Date,
     brandName: string,
     genericName: string,
     strength: string,
-    form: string
+    form: string,
+    inventory?: Inventory
   ) {
-    this.medication_id = medication_id;
+    this.medicationId = medicationId;
     this.name = name;
     this.category = category;
-    this.expiration_date = expiration_date;
+    this.expirationDate = expirationDate;
     this.brandName = brandName;
     this.genericName = genericName;
     this.strength = strength;
     this.form = form;
     
+    if(inventory) this.inventory = inventory;
+
     return this;
   }
 };

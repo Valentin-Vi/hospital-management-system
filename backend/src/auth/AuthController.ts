@@ -277,14 +277,14 @@ class AuthController {
   }
 
   #clearAuthCookies(response: Response) {
-    response.clearCookie('refreshToken', {
-        httpOnly: true,
-        sameSite: 'none',
-      });
-      response.clearCookie('accessToken', {
-        httpOnly: true,
-        sameSite: 'none',
-      });
+    response.cookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'none',
+    });
+    response.cookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'none',
+    });
   }
 };
 
