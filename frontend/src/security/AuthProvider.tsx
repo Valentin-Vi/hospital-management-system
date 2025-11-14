@@ -10,6 +10,7 @@ import RefreshResponseBodySchema from './schemas/RefreshSchema';
 export type TAuthContext = {
   user: TUserInfoSchema | undefined,
   setUser: React.Dispatch<React.SetStateAction<TUserInfoSchema | undefined>>,
+  getIsLoggedIn: () => boolean,
   login: (params: TLoginParams) => Promise<TLoginResult>,
   signup: (userInfo: TSignupParams) => Promise<{
     ok: boolean,
@@ -110,13 +111,19 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
     }
   }
 
+  const getIsLoggedIn = (): boolean => {
+    console.log(user?.email)
+    return (user?.email ? true : false);
+  }
+
   return (
     <AuthContext.Provider value={{
       user,
       setUser,
       signup,
       login,
-      logout
+      logout,
+      getIsLoggedIn
     }}>
       { children }
     </AuthContext.Provider>

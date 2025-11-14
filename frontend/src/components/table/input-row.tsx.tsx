@@ -1,3 +1,4 @@
+import { Calendar22 } from "@/@models/components/ui/date-picker"
 import { Input } from "@/@models/components/ui/input"
 import { TableCell, TableRow } from "@/@models/components/ui/table"
 import type { TMedicationWithInventorySchema } from "@/models/schemas/Medication"
@@ -40,6 +41,7 @@ export const InputRow = ({
         <Input value={inputData.form} onChange={(e) => setInputData(prev => ({ ...prev, form: e.target.value  }))} placeholder="Form..." type="text"/>
       </TableCell>
       <TableCell>
+        <Calendar22 date={inputData.expirationDate} />
         <Input value={inputData.inventory.quantity} onChange={(e) => setInputData(prev => ({ ...prev, inventory: { ...inputData.inventory, quantity: Number.parseInt(e.target.value) }}))} placeholder="Quantity..." type="number"/>
       </TableCell>
       <TableCell>

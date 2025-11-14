@@ -16,6 +16,9 @@ import {
 } from '@/@models/components/ui/popover';
 import { cn } from '@/@models/lib/utils';
 import { useLocation, useNavigate } from 'react-router';
+import { useAuth } from '@/security';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/@models/components/ui/dropdown-menu';
+import { MoreHorizontal, User } from 'lucide-react';
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -119,6 +122,8 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
     const containerRef = useRef<HTMLElement>(null);
     const nav = useNavigate();
     const loc = useLocation();
+
+    const { getIsLoggedIn, logout, user } = useAuth();
 
     useEffect(() => {
       const checkWidth = () => {
@@ -231,26 +236,45 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
             </div>
           </div>
           {/* Right side */}
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              onClick={() => handleRedirect('/auth/login')}
-            >
-              {signInText}
-            </Button>
-            <Button
-              size="sm"
-              className="text-sm font-medium px-4 h-9 rounded-md shadow-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                if (onCtaClick) onCtaClick();
-              }}
-            >
-              {ctaText}
-            </Button>
-          </div>
+          {
+            getIsLoggedIn() ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-primary hover:text-secondary">
+                    <span className="sr-only">{ user?.firstname }</span>
+                    <User/>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>User actions</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => logout()}>
+                    Log Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => handleRedirect('/auth/login')}
+                >
+                  {signInText}
+                </Button>
+                <Button
+                  size="sm"
+                  className="text-sm font-medium px-4 h-9 rounded-md shadow-sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onCtaClick) onCtaClick();
+                  }}
+                >
+                  {ctaText}
+                </Button>
+              </div>
+            )
+          }
         </div>
       </header>
     );

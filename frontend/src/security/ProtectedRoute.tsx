@@ -10,7 +10,7 @@ export type Props = {
 export default function ProtectedRoute({ authorizedRoles }: Props) {
   const { user } = useAuth();
 
-  if(!user) {
+  if(!user?.type) {
       return <LoadingPage />
   }
 
