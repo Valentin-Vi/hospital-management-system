@@ -1,5 +1,3 @@
-import { useState } from "react"
-
 type TEmailParams = {
   email: string,
   isValidEmail: boolean | undefined,

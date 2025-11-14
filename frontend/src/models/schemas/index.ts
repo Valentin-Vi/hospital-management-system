@@ -3,7 +3,7 @@ import {
 } from "./UserSchema";
 import {
   MedicationSchema, type TMedicationSchema
-} from "./MedicationSchema";
+} from "./Medication";
 
 export {
   UserSchema, type TUserSchema,

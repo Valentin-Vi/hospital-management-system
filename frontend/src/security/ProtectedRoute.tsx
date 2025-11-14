@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router'
 import useAuth from './AuthProvider'
-import type { TUserTypeEnumSchema } from '@models/schemas';
-import { LoadingPage } from '@pages';
+import type { TUserTypeEnumSchema } from '@/models/schemas';
+import { LoadingPage } from '@/pages';
 
 export type Props = {
   authorizedRoles: TUserTypeEnumSchema[],

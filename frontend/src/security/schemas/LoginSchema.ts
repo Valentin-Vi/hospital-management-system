@@ -1,5 +1,5 @@
-import { UserSchema } from "@models/schemas";
-import { SignupParamsSchema } from "@security/schemas";
+import { UserSchema } from "@/models/schemas";
+import { SignupParamsSchema } from "@/security/schemas";
 import { z } from "zod";
 
 const UserDataSchema = UserSchema.pick({

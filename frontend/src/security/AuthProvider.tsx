@@ -1,4 +1,4 @@
-import type { TLoginParams, TSignupParams, TUserInfoSchema } from '@security/schemas'
+import type { TLoginParams, TSignupParams, TUserInfoSchema } from '@/security/schemas'
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoginResponseBodySchema } from "./schemas/LoginSchema";

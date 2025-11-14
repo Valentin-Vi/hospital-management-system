@@ -1,20 +1,22 @@
-import { MdOutlineSearchOff } from "react-icons/md";
+import { ShieldAlert } from "lucide-react";
 
 export default function ErrorPage() {
   return (
-    <div className='flex flex-col items-center w-full h-full pt-10 pb-10'>
-      <div className="m-2 text-6xl text-black">
-        <MdOutlineSearchOff />
+    <div className="flex flex-col justify-center items-center h-full gap-2">
+      <div>
+        <ShieldAlert className="w-18 h-18"/>
       </div>
-      <span className="text-x text-black font-bold text-center mb-2">
-        Error
-      </span>
-      <label className="text-sm text-gray-600 text-center mb-2">
-        Could find the requested page
-      </label>
-      <span className="text-xs text-gray-400 italic">
-        404 Not Found...
-      </span>
+      <div className="text-center">
+        <p className="text-xl mb-1">
+          Error
+        </p>
+        <label>
+          Could find the requested page
+        </label>
+        <p className="sm text-gray-500">
+          404 Not Found...
+        </p>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import { EmailInput, PasswordInput } from "@components";
-import { useAuth } from "@security";
+import { EmailInput, PasswordInput } from "@/components";
+import { useAuth } from "@/security";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 

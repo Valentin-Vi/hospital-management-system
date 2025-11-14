@@ -25,19 +25,9 @@
     "noUncheckedSideEffectImports": true,
 
     /* === ADD THESE TWO === */
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "@models": ["./models"],
-      "@models/types": ["./models/types"],
-      "@models/schemas": ["./models/schemas"],
-      "@pages": ["./pages"],
-      "@pages/*": ["./pages/*"],
-      "@components": ["./components"],
-      "@components/*": ["./components/*"],
-      "@security": ["./security"],
-      "@security/types": ["./security/types"],
-      "@security/schemas": ["./security/schemas"],
-      "@router": ["./router"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]

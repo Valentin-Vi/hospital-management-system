@@ -1,4 +1,4 @@
-import type { TUserSchema, TUserTypeEnumSchema } from '@models/schemas'
+import type { TUserSchema, TUserTypeEnumSchema } from '@/models/schemas'
 
 class User {
   userId: number = 0;
