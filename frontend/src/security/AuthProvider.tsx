@@ -1,7 +1,7 @@
 import type { TLoginParams, TSignupParams, TUserInfoSchema } from '@/security/schemas'
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LoginResponseBodySchema } from "./schemas/LoginSchema";
+import { loginResponseBodySchema } from "./schemas/LoginSchema";
 import fetchAuth from './fetchAuth';
 import type { TLoginResult } from './types/TAuthResults';
 import { z } from 'zod';
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
     });
 
     const json = await response.json();
-    const parsed = LoginResponseBodySchema.safeParse(json);
+    const parsed = loginResponseBodySchema.safeParse(json);
 
     if(!response.ok || !parsed.success) {
       const message = parsed.success ? (parsed.data.message ?? 'Login failed') : 'Invalid log-in schema';

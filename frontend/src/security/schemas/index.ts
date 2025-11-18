@@ -1,7 +1,7 @@
 import {
-  LoginParamsSchema,
+  loginParamsSchema,
   type TLoginParams,
-  LoginResponseBodySchema,
+  loginResponseBodySchema,
   type TLoginResponseBody
 } from "./LoginSchema";
 
@@ -10,11 +10,11 @@ import {
   type TSignupParams,
 } from "./SignupParamsSchema";
 
-import { UserInfoSchema, type TUserInfoSchema } from "./UserInfoSchema";
+import { userInfoSchema, type TUserInfoSchema } from "./UserInfoSchema";
 
 export {
-  LoginParamsSchema, type TLoginParams,
-  LoginResponseBodySchema, type TLoginResponseBody,
+  loginParamsSchema, type TLoginParams,
+  loginResponseBodySchema, type TLoginResponseBody,
   SignupParamsSchema, type TSignupParams,
-  UserInfoSchema, type TUserInfoSchema
+  userInfoSchema, type TUserInfoSchema
 }

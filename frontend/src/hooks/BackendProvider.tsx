@@ -1,5 +1,5 @@
-import { UserSchema, type TUserSchema } from "@/models/schemas"
-import { MedicationSchema, type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/schemas/Medication"
+import { userSchema, type TUserSchema } from "@/models/user"
+import { medicationSchema, type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/medication"
 import { createContext, useContext, type ReactNode } from "react"
 import { z, type ZodType } from "zod"
 
@@ -27,7 +27,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      MedicationSchema.array()
+      medicationSchema.array()
     );
   }
 
@@ -41,7 +41,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      UserSchema.array()
+      userSchema.array()
     );
   }
 
@@ -55,7 +55,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      MedicationSchema.array()
+      medicationSchema.array()
     );
   }
 
@@ -70,12 +70,12 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      MedicationSchema.array()
+      medicationSchema.array()
     );
   }
 
   const insertMedicationRow = async (medication: TMedicationWithInventorySchema): Promise<boolean> => {
-    const result = MedicationSchema.safeParse(medication);
+    const result = medicationSchema.safeParse(medication);
     console.log(result.error)
     if(!result.success) return false;
     return (await fetch('http://localhost:3010/medication/insert', {

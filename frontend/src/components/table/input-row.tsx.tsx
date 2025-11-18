@@ -1,21 +1,24 @@
 import { Calendar22 } from "@/@models/components/ui/date-picker"
 import { Input } from "@/@models/components/ui/input"
 import { TableCell, TableRow } from "@/@models/components/ui/table"
-import type { TMedicationWithInventorySchema } from "@/models/schemas/Medication"
+import { cn } from "@/@models/lib/utils"
+import type { TMedicationWithInventorySchema } from "@/models/medication/schema"
 import type React from "react"
 
 export type InputRowProps = {
   inputData: TMedicationWithInventorySchema
   setInputData: React.Dispatch<React.SetStateAction<TMedicationWithInventorySchema>>
+  className: string
 }
 
 export const InputRow = ({
+  className = '',
   inputData,
   setInputData
 }: InputRowProps) => {
 
   return (
-    <TableRow>
+    <TableRow className={cn('', className)}>
       <TableCell />
       <TableCell>
       </TableCell>
@@ -41,7 +44,7 @@ export const InputRow = ({
         <Input value={inputData.form} onChange={(e) => setInputData(prev => ({ ...prev, form: e.target.value  }))} placeholder="Form..." type="text"/>
       </TableCell>
       <TableCell>
-        <Calendar22 date={inputData.expirationDate} />
+        <Calendar22 date={inputData.expirationDate} setDate={(date) => setInputData(prev => ({ ...prev, expirationDate: date }))}/>
         <Input value={inputData.inventory.quantity} onChange={(e) => setInputData(prev => ({ ...prev, inventory: { ...inputData.inventory, quantity: Number.parseInt(e.target.value) }}))} placeholder="Quantity..." type="number"/>
       </TableCell>
       <TableCell>

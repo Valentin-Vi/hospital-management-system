@@ -1,4 +1,4 @@
-import React, { use, useState, type ChangeEvent } from "react"
+import { useState, type ChangeEvent } from "react"
 import {
   flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable,
   type ColumnFiltersState, type PaginationState, type SortingState, type VisibilityState,
@@ -9,18 +9,13 @@ import { Input } from "@/@models/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/@models/components/ui/table"
 import { ChevronDown, CirclePlus, Trash2 } from "lucide-react"
 
-import { type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/schemas/Medication.ts"
+import { type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/medication/schema.ts"
 
 import columns from "./columns"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import useBackend from "@/hooks/BackendProvider"
 import { InputRow } from "../../components/table/input-row.tsx.tsx"
 import { ButterflyButton } from "@/components/ui/butterfly-button.tsx"
-
-export type MedictionTableProps = {
-  data: TMedicationSchema[],
-  setData: React.Dispatch<React.SetStateAction<TMedicationSchema[]>>
-}
 
 const tableProps = {
   columns,
@@ -30,7 +25,7 @@ const tableProps = {
   getFilteredRowModel: getFilteredRowModel(),
 }
 
-const initInputRowData = {
+const initInputRowData: TMedicationWithInventorySchema = {
   medicationId: 0,
   name: '',
   category: '',
@@ -44,13 +39,10 @@ const initInputRowData = {
     productId: 0,
     quantity: 0,
     minimumQuantity: 0
-  }
+  },
 };
 
-export default function MedicationsTable({
-  data,
-  setData
-}: MedictionTableProps) {
+export default function MedicationsTable() {
   const [sorting, onSortingChange] = useState<SortingState>([{ id: 'medicationId', desc: false }]);
   const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>([]);
   const [columnVisibility, onColumnVisibilityChange] = useState<VisibilityState>({});
@@ -61,11 +53,17 @@ export default function MedicationsTable({
   const [showInputRow, setShowInputRow] = useState<boolean>(false);
   const [inputRowData, setInputRowData] = useState<TMedicationWithInventorySchema>(initInputRowData)
 
-  const { deleteMedications, insertMedicationRow } = useBackend()
+  const { deleteMedications, insertMedicationRow, getEntireMedicationsInventory } = useBackend()
+  const queryClient = useQueryClient()
+
+  const { data: medications = [] } = useQuery({
+    queryKey: ['medications', 'get-all'],
+    queryFn: async () => await getEntireMedicationsInventory(),
+  })
 
   const table = useReactTable({
     ...tableProps,
-    data,
+    data: medications,
     onSortingChange,
     onColumnFiltersChange,
     onColumnVisibilityChange,
@@ -74,27 +72,35 @@ export default function MedicationsTable({
     state: { sorting, columnFilters, columnVisibility, pagination, rowSelection },
   })
 
-  const { refetch, isLoading } = useQuery({
-    queryKey: ['medications', 'delete'],
-    queryFn: async () => await deleteMedications(selectedIds.map(row => row.original.medicationId)),
-    enabled: false
-  })
-  
-  const {refetch: refetch2, isLoading: isLoading2 } = useQuery({
-    queryKey: ['medications', 'insert'],
-    queryFn: async () => await insertMedicationRow(inputRowData),
-    enabled: false
+  const selectedIds = table.getSelectedRowModel().rows;
+
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => await deleteMedications(ids),
+    onSuccess: (_, ids) => {
+      queryClient.setQueryData<TMedicationSchema[]>(['medications', 'get-all'], (prev = []) =>
+        prev.filter((item) => !ids.includes(item.medicationId))
+      )
+      table.resetRowSelection();
+    }
   })
 
-  const selectedIds = table.getSelectedRowModel().rows;
+  const insertMutation = useMutation({
+    mutationFn: async (payload: TMedicationWithInventorySchema) => await insertMedicationRow(payload),
+    onSuccess: (created) => {
+      if (created) {
+        queryClient.setQueryData<TMedicationSchema[]>(['medications', 'get-all'], (prev = []) => [...prev, created])
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['medications', 'get-all'] })
+      }
+      setShowInputRow(false)
+      onPaginationChange(prev => ({ pageIndex: prev.pageIndex, pageSize: 10 }))
+      setInputRowData(initInputRowData)
+    }
+  })
   
   const handleDelete = () => {
-    if(selectedIds.length === 0 || isLoading) return;    
-    refetch()
-    setData((prev) =>
-      prev.filter((item) => !selectedIds.some(row => row.original.medicationId === item.medicationId))
-    );
-    table.resetRowSelection();
+    if(selectedIds.length === 0 || deleteMutation.isPending) return;
+    deleteMutation.mutate(selectedIds.map(row => row.original.medicationId))
   }
 
   const handleOpenInputRow = () => {
@@ -108,16 +114,8 @@ export default function MedicationsTable({
   }
 
   const handleInsertRow = () => {
-    if(isLoading2) return;
-    console.log('fdfd')
-    refetch2();
-    setData((prev) => {
-      return [
-        ...prev,
-        inputRowData
-      ]
-    })
-    setShowInputRow(false)
+    if(insertMutation.isPending) return;
+    insertMutation.mutate(inputRowData)
   }
 
 

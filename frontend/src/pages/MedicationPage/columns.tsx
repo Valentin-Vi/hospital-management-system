@@ -1,6 +1,6 @@
 import { Button } from "@/@models/components/ui/button"
 import { Checkbox } from "@/@models/components/ui/checkbox"
-import type { TMedicationSchema } from "@/models/schemas/Medication"
+import type { TMedicationSchema } from "@/models/medication/schema"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/@models/components/ui/dropdown-menu"
 import type { Column, ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"

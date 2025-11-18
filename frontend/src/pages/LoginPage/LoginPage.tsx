@@ -1,86 +1,58 @@
-import { EmailInput, PasswordInput } from "@/components";
 import { useAuth } from "@/security";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { Input } from "@/@models/components/ui/input"
+import { Label } from "@/@models/components/ui/label";
+import { Card } from "@/@models/components/ui/card";
+import { Button } from "@/@models/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 
 export default function LoginPage() {
   
   const { login } = useAuth();
 
-  const navigate = useNavigate();
+  const nav = useNavigate();
 
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   
-  const [isValidEmail, setIsValidEmail] = useState<boolean | undefined>(undefined);
-  const [isValidPassword, setIsValidPassword] = useState<boolean | undefined>(undefined);
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([])
 
-  async function handleLogin() {
-    if(isValidEmail && isValidPassword) {
-      if((await login({ email, password })).ok) {
-        navigate('/services/home')
-      }
-    }
+  const { data, refetch, isLoading } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => (await login({ email, password })).ok
+  })
+
+  const onEmailChange = (value: string) => {
+    setEmail(value)
+  }
+
+  const onPasswordChange = (value: string) => {
+    setPassword(value)
+  }
+
+  const onClickLogin = () => {
+    if(isLoading) return;
+    refetch()
+    
   }
 
   return (
-    <div className="inset-0 flex flex-col justify-center items-center h-full bg-slate-100">
-      <div className="flex flex-col bg-white p-2 rounded-t-md rounded-r-md rounded-l-md w-80 min-h-auto max-h-80 shadow-lg">
-        <div className="overflow-y-scroll p-1">
-          <div className="mt-2 flex flex-col">
-            <label className="text-xl">
-              Email
-            </label>
-            <EmailInput
-              email={email}
-              setEmail={setEmail}
-              displlayErrors={true}
-              isValidEmail={isValidEmail}
-              setIsValidEmail={setIsValidEmail}
-            />
-          </div>
-
-          <div className="mt-2 flex flex-col">
-            <label className="text-xl">
-              Password
-            </label>
-            <PasswordInput
-              password={password}
-              setPassword={setPassword}
-              setPasswordErrors={setPasswordErrors}
-              isValidPassword={isValidPassword}
-              setIsValidPassword={setIsValidPassword}
-            />
-          </div>
-          {
-            passwordErrors.length !== 0 &&
-            <div className="pl-4 pr-2">
-              <ul className="list-disc text-gray-500 text-sm">
-                {
-                  passwordErrors.map((value, index) => {
-                    return (
-                      <li className="" key={index}>
-                        { value }
-                      </li>
-                    )
-                  })
-                }
-              </ul>
-            </div>
-          }
+    <div className="w-full h-full flex justify-center items-center">
+      <Card className="flex flex-col w-64 p-4 gap-2">
+        <div className="flex flex-col gap-2">
+          <Label>Email</Label>
+          <Input type="email" value={email} onChange={(e) => onEmailChange(e.target.value)} placeholder="example@provider.com"/>
         </div>
-        <div className="flex flex-row justify-evenly mt-4 bg-white">
-          <button 
-            onClick={handleLogin}
-            className={`
-              text-white text-xl rounded-sm w-24 bg-blue-500 hover:bg-blue-600
-            `}
-          >
+        <div className="flex flex-col gap-2">
+          <Label>Password</Label>
+          <Input type="password" value={password} onChange={(e) => onPasswordChange(e.target.value)} placeholder="*****"/>
+        </div>
+        <div className="flex justify-center items-center">
+          <Button onClick={onClickLogin}>
             Login
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   )
 };
