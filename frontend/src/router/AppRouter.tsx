@@ -1,8 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router";
-import ProtectedRoute from "security/ProtectedRoute";
-import { LoginPage, ErrorPage, MedicalReport, MedicationPage } from "@pages";
-import Layout from "@components/composition/Layout";
-import { SearchField } from "@components/ui/search-field";
+import ProtectedRoute from "@/security/ProtectedRoute";
+import { LoginPage, ErrorPage, MedicalReport, MedicationPage } from "@/pages";
+import Layout from "@/components/composition/Layout";
 
 export default createBrowserRouter([
   {
@@ -10,9 +9,6 @@ export default createBrowserRouter([
     element: <Navigate to='/auth/login'/>,
     errorElement: <Navigate to='/error' />
   }, {
-    path: '/test',
-    element: <SearchField variant="white_bordered"/>
-  } ,{
     path: '/auth',
     element: <ProtectedRoute authorizedRoles={['VISITOR']} />,
     errorElement: <Navigate to='/error' />,
@@ -37,7 +33,7 @@ export default createBrowserRouter([
         element: <Layout />,
         children: [
           {
-            path: '/services/medication',
+            path: '/services/medications',
             element: <MedicationPage />,
           }
         ]

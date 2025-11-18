@@ -20,16 +20,9 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": "src",                                  /* Specify the base directory to resolve non-relative module names. */
+    "baseUrl": ".",                                  /* Specify the base directory to resolve non-relative module names. */
     "paths": {
-      "@models": ["./models"],
-      "@models/types": ["./models/types"],
-      "@models/schemas": ["./models/schemas"],
-      "@pages": ["./pages"],
-      "@components": ["./components"],
-      "@components/*": ["./components/*"],
-      "@security": ["./security"],
-      "@router": ["./router"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["vite.config.ts"]

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { LoginResponseBodySchema } from './LoginSchema';
+import { loginResponseBodySchema } from './LoginSchema';
 
-const RefreshResponseBodySchema = LoginResponseBodySchema;
+const RefreshResponseBodySchema = loginResponseBodySchema;
 
 export default RefreshResponseBodySchema
 

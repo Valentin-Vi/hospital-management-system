@@ -1,13 +1,14 @@
 import { Outlet } from "react-router";
-import { NavBar } from "@components/navigation";
+import { Navbar01 } from "../ui/shadcn-io/navbar-01";
 
 export default function Layout() {
   return (
-    <div className="w-full h-full app-container flex flex-col bg-slate-200 p-1">
+    <div className="w-screen h-screen app-container flex flex-col">
       <nav
         className="flex justify-center mb-1"
       >
-        <NavBar />
+        <Navbar01 />
+        {/* <NavBar /> */}
       </nav>
       <main
         className="

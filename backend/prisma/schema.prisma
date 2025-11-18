@@ -66,14 +66,14 @@ model Admin {
   @@map("admins")
 }
 
-model Item {
-  itemId          Int        @id @unique @default(autoincrement())
-  productId       Int        @unique
+model Inventory {
+  inventoryId      Int        @id @unique @default(autoincrement())
+  productId        Int        @unique
   quantity         Int        @default(0)
-  minimun_quantity Int        @default(0)
+  minimum_quantity Int        @default(0)
   medication       Medication @relation(fields: [productId], references: [medicationId])
 
-  @@map("items")
+  @@map("inventory")
 }
 
 model Medication {
@@ -85,7 +85,7 @@ model Medication {
   generic_name    String
   strength        String
   form            String
-  items           Item?
+  inventory       Inventory?
 
   @@map("medications")
 }

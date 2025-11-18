@@ -1,9 +1,10 @@
 import { z } from 'zod';
-import { UserSchema } from '@models/schemas';
+import { userSchema } from '@/models/user';
 
-export const UserInfoSchema = UserSchema.omit({
+export const userInfoSchema = userSchema.omit({
   userId: true,
-  enabled: true
+  enabled: true,
+  password: true
 })
 
-export type TUserInfoSchema = z.infer<typeof UserInfoSchema>
+export type TUserInfoSchema = z.infer<typeof userInfoSchema>

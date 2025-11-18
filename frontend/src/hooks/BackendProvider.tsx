@@ -1,18 +1,35 @@
-import { UserSchema, type TMedicationSchema, type TUserSchema } from "@models/schemas"
-import { MedicationSchema } from "@models/schemas"
+import { userSchema, type TUserSchema } from "@/models/user"
+import { medicationSchema, type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/medication"
 import { createContext, useContext, type ReactNode } from "react"
-import { z, type ZodTypeAny } from "zod"
+import { z, type ZodType } from "zod"
 
 export type TBackendContext = {
   getPaginatedUsers: (page: number, limit: number) => Promise<TUserSchema[]>;
   getPaginatedMedications: (page: number, limit: number) => Promise<TMedicationSchema[]>;
   getFilteredPaginatedMedications: (page: number, limit: number, filter: { column: string, value: string }) => Promise<TMedicationSchema[]>;
   deleteMedicationRow: (rowId: number) => Promise<boolean>;
+  getPaginatedInventory: (page: number, limit: number) => Promise<any[]>;
+  deleteMedications: (rowIds: number[]) => Promise<boolean>;
+  getEntireMedicationsInventory: () => Promise<TMedicationSchema[]>;
+  insertMedicationRow: (medication: TMedicationWithInventorySchema) => Promise<boolean>;
 }
 
 const BackendContext = createContext<TBackendContext | undefined>(undefined)
 
 export function BackendProvider({ children }: { children?: ReactNode }) {
+
+  async function getEntireMedicationsInventory(): Promise<TMedicationSchema[]> {
+    return await getData(
+      await fetch('http://localhost:3010/medication/get-all', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }),
+      medicationSchema.array()
+    );
+  }
 
   async function getPaginatedUsers(page: number, limit: number): Promise<TUserSchema[]> {
     if(page < 0 || limit < 1) throw new Error('Inalid query params');
@@ -24,7 +41,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      UserSchema.array()
+      userSchema.array()
     );
   }
 
@@ -38,7 +55,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      MedicationSchema.array()
+      medicationSchema.array()
     );
   }
 
@@ -53,8 +70,22 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      MedicationSchema.array()
+      medicationSchema.array()
     );
+  }
+
+  const insertMedicationRow = async (medication: TMedicationWithInventorySchema): Promise<boolean> => {
+    const result = medicationSchema.safeParse(medication);
+    console.log(result.error)
+    if(!result.success) return false;
+    return (await fetch('http://localhost:3010/medication/insert', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(medication)
+    })).ok
   }
 
   const deleteMedicationRow = async (rowId: number): Promise<boolean> => {
@@ -65,12 +96,34 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
     })).ok
   }
 
-  const getData = async <T extends ZodTypeAny>(response: Response, schema: T): Promise<z.infer<T>> => {
+  const getPaginatedInventory = async (page: number, limit: number) => {
+    if(page < 0 || limit < 1) throw new Error('Inalid query params');
+    return await getData(
+      await fetch(`http://localhost:3010/inventory/get-paginated?page=${page}&limit=${limit}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }),
+      z.any().array()
+    );
+  }
+
+  const deleteMedications = async (rowIds: number[]) => {
+    if(rowIds.length === 0) return false;
+    return (await fetch(`http://localhost:3010/medication/delete-many?rowIds=${rowIds.join(',')}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })).ok
+  }
+
+  const getData = async <T extends ZodType<any>>(response: Response, schema: T): Promise<z.output<T>> => {
     const responseBody = await response.json();
     const medications = JSON.parse(responseBody.medications);
     const result = schema.safeParse(medications)
-    
-    return result.data
+
+    return result.data as z.output<T>;
   }
 
 
@@ -79,7 +132,11 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
       getPaginatedUsers,
       getPaginatedMedications,
       getFilteredPaginatedMedications,
-      deleteMedicationRow
+      deleteMedicationRow,
+      getPaginatedInventory,
+      deleteMedications,
+      getEntireMedicationsInventory,
+      insertMedicationRow
     }}>
     { children }
     </BackendContext.Provider>

@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router'
 import useAuth from './AuthProvider'
-import type { TUserTypeEnumSchema } from '@models/schemas';
-import { LoadingPage } from '@pages';
+import type { TUserTypeEnumSchema } from '@/models/schemas';
+import { LoadingPage } from '@/pages';
 
 export type Props = {
   authorizedRoles: TUserTypeEnumSchema[],
@@ -10,7 +10,7 @@ export type Props = {
 export default function ProtectedRoute({ authorizedRoles }: Props) {
   const { user } = useAuth();
 
-  if(!user) {
+  if(!user?.type) {
       return <LoadingPage />
   }
 
