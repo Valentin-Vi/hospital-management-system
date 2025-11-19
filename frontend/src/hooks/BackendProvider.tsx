@@ -1,5 +1,5 @@
 import { userSchema, type TUserSchema } from "@/models/user"
-import { medicationSchema, type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/medication"
+import { medicationSchema, medicationWithInventorySchema, type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/medication"
 import { createContext, useContext, type ReactNode } from "react"
 import { z, type ZodType } from "zod"
 
@@ -10,7 +10,7 @@ export type TBackendContext = {
   deleteMedicationRow: (rowId: number) => Promise<boolean>;
   getPaginatedInventory: (page: number, limit: number) => Promise<any[]>;
   deleteMedications: (rowIds: number[]) => Promise<boolean>;
-  getEntireMedicationsInventory: () => Promise<TMedicationSchema[]>;
+  getEntireMedicationsInventory: () => Promise<TMedicationWithInventorySchema[]>;
   insertMedicationRow: (medication: TMedicationWithInventorySchema) => Promise<boolean>;
 }
 
@@ -18,7 +18,7 @@ const BackendContext = createContext<TBackendContext | undefined>(undefined)
 
 export function BackendProvider({ children }: { children?: ReactNode }) {
 
-  async function getEntireMedicationsInventory(): Promise<TMedicationSchema[]> {
+  async function getEntireMedicationsInventory(): Promise<TMedicationWithInventorySchema[]> {
     return await getData(
       await fetch('http://localhost:3010/medication/get-all', {
         method: 'GET',
@@ -27,7 +27,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      medicationSchema.array()
+      medicationWithInventorySchema.array()
     );
   }
 
@@ -75,8 +75,15 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   }
 
   const insertMedicationRow = async (medication: TMedicationWithInventorySchema): Promise<boolean> => {
-    const result = medicationSchema.safeParse(medication);
-    console.log(result.error)
+    const payload: TMedicationWithInventorySchema = {
+      ...medication,
+      expirationDate:
+        medication.expirationDate instanceof Date
+          ? medication.expirationDate.toISOString()
+          : medication.expirationDate
+    }
+
+    const result = medicationWithInventorySchema.safeParse(payload);
     if(!result.success) return false;
     return (await fetch('http://localhost:3010/medication/insert', {
       method: 'POST',
@@ -84,7 +91,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(medication)
+      body: JSON.stringify(payload)
     })).ok
   }
 
@@ -120,8 +127,15 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
 
   const getData = async <T extends ZodType<any>>(response: Response, schema: T): Promise<z.output<T>> => {
     const responseBody = await response.json();
-    const medications = JSON.parse(responseBody.medications);
+    const medications = typeof responseBody.medications === 'string'
+      ? JSON.parse(responseBody.medications)
+      : responseBody.medications;
     const result = schema.safeParse(medications)
+
+    if (!result.success) {
+      console.error('Failed to parse backend response', result.error, medications);
+      throw new Error('Invalid server response');
+    }
 
     return result.data as z.output<T>;
   }

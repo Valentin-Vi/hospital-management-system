@@ -21,11 +21,11 @@ export type TAuthContext = {
   }>
 }
 
-const defaultUserData = {
+const defaultUserData: TUserInfoSchema = {
   email: '',
   firstname: '',
   lastname: '',
-  type: 'VISITOR' as const // UserTypeEnumSchema.Enum['VISITOR']
+  type: 'VISITOR'
 };
 
 const AuthContext = createContext<TAuthContext>({} as TAuthContext);
@@ -112,7 +112,6 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
   }
 
   const getIsLoggedIn = (): boolean => {
-    console.log(user?.email)
     return (user?.email ? true : false);
   }
 

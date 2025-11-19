@@ -29,7 +29,7 @@ export const InputRow = ({
         <Input value={inputData.category} onChange={(e) => setInputData(prev => ({ ...prev, category: e.target.value  }))} placeholder="Category..." type="text"/>
       </TableCell>
       <TableCell>
-        <Input value={inputData.expirationDate} onChange={(e) => setInputData(prev => ({ ...prev, expirationDate: e.target.value  }))} placeholder="Expiration Data..." type="text"/>
+        <Calendar22 date={inputData.expirationDate} setDate={(date) => setInputData(prev => ({ ...prev, expirationDate: date }))} disablePastDates/>
       </TableCell>
       <TableCell>
         <Input value={inputData.brandName} onChange={(e) => setInputData(prev => ({ ...prev, brandName: e.target.value }))} placeholder="Brand Name..." type="text"/>
@@ -44,7 +44,6 @@ export const InputRow = ({
         <Input value={inputData.form} onChange={(e) => setInputData(prev => ({ ...prev, form: e.target.value  }))} placeholder="Form..." type="text"/>
       </TableCell>
       <TableCell>
-        <Calendar22 date={inputData.expirationDate} setDate={(date) => setInputData(prev => ({ ...prev, expirationDate: date }))}/>
         <Input value={inputData.inventory.quantity} onChange={(e) => setInputData(prev => ({ ...prev, inventory: { ...inputData.inventory, quantity: Number.parseInt(e.target.value) }}))} placeholder="Quantity..." type="number"/>
       </TableCell>
       <TableCell>

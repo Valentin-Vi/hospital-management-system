@@ -23,6 +23,7 @@ class MedicationController {
       response,
       async () => {
         const medication = request.body;
+        console.log(medication)
         MedicationSchema.parse(medication)
         return response.status(200).json({
           message: "Request successful.",
