@@ -20,7 +20,13 @@ class MedicationDal {
         brand_name: medication.brandName,
         generic_name: medication.genericName,
         strength: medication.strength,
-        form: medication.form
+        form: medication.form,
+        inventory: {
+          create: {
+            quantity: medication.inventory?.quantity,
+            minimum_quantity: medication.inventory?.minimumQuantity
+          }
+        }
       }
     })
     return this._buildOne(prismaMedication)

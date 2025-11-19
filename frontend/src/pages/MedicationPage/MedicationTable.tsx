@@ -9,7 +9,7 @@ import { Input } from "@/@models/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/@models/components/ui/table"
 import { ChevronDown, CirclePlus, Trash2 } from "lucide-react"
 
-import { type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/medication/schema.ts"
+import { type TMedicationWithInventorySchema } from "@/models/medication/schema.ts"
 
 import columns from "./columns"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -56,7 +56,7 @@ export default function MedicationsTable() {
   const { deleteMedications, insertMedicationRow, getEntireMedicationsInventory } = useBackend()
   const queryClient = useQueryClient()
 
-  const { data: medications = [] } = useQuery({
+  const { data: medications = [] } = useQuery<TMedicationWithInventorySchema[]>({
     queryKey: ['medications', 'get-all'],
     queryFn: async () => await getEntireMedicationsInventory(),
   })
@@ -77,7 +77,7 @@ export default function MedicationsTable() {
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => await deleteMedications(ids),
     onSuccess: (_, ids) => {
-      queryClient.setQueryData<TMedicationSchema[]>(['medications', 'get-all'], (prev = []) =>
+      queryClient.setQueryData<TMedicationWithInventorySchema[]>(['medications', 'get-all'], (prev = []) =>
         prev.filter((item) => !ids.includes(item.medicationId))
       )
       table.resetRowSelection();
@@ -86,15 +86,13 @@ export default function MedicationsTable() {
 
   const insertMutation = useMutation({
     mutationFn: async (payload: TMedicationWithInventorySchema) => await insertMedicationRow(payload),
-    onSuccess: (created) => {
-      if (created) {
-        queryClient.setQueryData<TMedicationSchema[]>(['medications', 'get-all'], (prev = []) => [...prev, created])
-      } else {
+    onSuccess: (completed) => {
+      if (completed) {
         queryClient.invalidateQueries({ queryKey: ['medications', 'get-all'] })
+        setShowInputRow(false)
+        onPaginationChange(prev => ({ pageIndex: prev.pageIndex, pageSize: 10 }))
+        setInputRowData(initInputRowData)
       }
-      setShowInputRow(false)
-      onPaginationChange(prev => ({ pageIndex: prev.pageIndex, pageSize: 10 }))
-      setInputRowData(initInputRowData)
     }
   })
   

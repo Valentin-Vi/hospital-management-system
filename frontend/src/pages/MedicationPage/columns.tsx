@@ -1,12 +1,12 @@
 import { Button } from "@/@models/components/ui/button"
 import { Checkbox } from "@/@models/components/ui/checkbox"
-import type { TMedicationSchema } from "@/models/medication/schema"
+import type { TMedicationWithInventorySchema } from "@/models/medication/schema"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/@models/components/ui/dropdown-menu"
 import type { Column, ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 
 type SortableHeaderProps = React.PropsWithChildren<{
-  column: Column<TMedicationSchema>;
+  column: Column<TMedicationWithInventorySchema>;
   className?: string;
 }>;
 
@@ -97,11 +97,13 @@ export default [
     cell: ({ row }) => <div className="text-right">{row.getValue('form')}</div>,
   },
   {
-    accessorKey: 'quantity',
+    id: 'quantity',
+    accessorFn: (row) => row.inventory?.quantity ?? 0,
     header: ({ column }) => (<SortableHeader column={column}>Quantity</SortableHeader>),
     cell: ({ row }) => <div className="text-right">{ row.getValue('quantity') }</div>,
   }, {
-    accessorKey: 'minimumQuantity',
+    id: 'minimumQuantity',
+    accessorFn: (row) => row.inventory?.minimumQuantity ?? 0,
     header: ({ column }) => (<SortableHeader column={column}>Minimum quantity</SortableHeader>),
     cell: ({ row }) => <div className="text-right">{ row.getValue('minimumQuantity') }</div>,
   },
@@ -130,5 +132,4 @@ export default [
       </DropdownMenu>
     ),
   },
-] as ColumnDef<TMedicationSchema>[]
-
+] as ColumnDef<TMedicationWithInventorySchema>[]

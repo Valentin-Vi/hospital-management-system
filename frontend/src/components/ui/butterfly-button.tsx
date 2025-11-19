@@ -1,7 +1,7 @@
-import { Button, buttonVariants } from "@/@models/components/ui/button"
+import { Button } from "@/@models/components/ui/button"
 import { ButtonGroup } from "@/@models/components/ui/button-group";
 import { Trash2, X, type LucideProps } from "lucide-react";
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 export type ButterflyButtonProps = {
   callback: () => void;
