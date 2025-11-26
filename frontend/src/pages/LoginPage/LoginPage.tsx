@@ -1,10 +1,10 @@
 import { useAuth } from "@/security";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Input } from "@/@models/components/ui/input"
-import { Label } from "@/@models/components/ui/label";
-import { Card } from "@/@models/components/ui/card";
-import { Button } from "@/@models/components/ui/button";
+import { Input } from "@/components/ui/shadcn-io/input"
+import { Label } from "@/components/ui/shadcn-io/label";
+import { Card } from "@/components/ui/shadcn-io/card";
+import { Button } from "@/components/ui/shadcn-io/button";
 import { useQuery } from "@tanstack/react-query";
 
 export default function LoginPage() {

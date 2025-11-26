@@ -1,14 +1,14 @@
-import { Calendar22 } from "@/@models/components/ui/date-picker"
-import { Input } from "@/@models/components/ui/input"
-import { TableCell, TableRow } from "@/@models/components/ui/table"
-import { cn } from "@/@models/lib/utils"
+import { Calendar22 } from "@/components/ui/shadcn-io/date-picker"
+import { Input } from "@/components/ui/shadcn-io/input"
+import { TableCell, TableRow } from "@/components/ui/shadcn-io/table"
+import { cn } from "@/utils/cn"
 import type { TMedicationWithInventorySchema } from "@/models/medication/schema"
 import type React from "react"
 
 export type InputRowProps = {
   inputData: TMedicationWithInventorySchema
   setInputData: React.Dispatch<React.SetStateAction<TMedicationWithInventorySchema>>
-  className: string
+  className?: string
 }
 
 export const InputRow = ({
@@ -16,6 +16,10 @@ export const InputRow = ({
   inputData,
   setInputData
 }: InputRowProps) => {
+
+  const setDate = (date: Date) => {
+    setInputData(prev => ({ ...prev, expirationDate: date }))
+  }
 
   return (
     <TableRow className={cn('', className)}>
@@ -29,7 +33,7 @@ export const InputRow = ({
         <Input value={inputData.category} onChange={(e) => setInputData(prev => ({ ...prev, category: e.target.value  }))} placeholder="Category..." type="text"/>
       </TableCell>
       <TableCell>
-        <Calendar22 date={inputData.expirationDate} setDate={(date) => setInputData(prev => ({ ...prev, expirationDate: date }))} disablePastDates/>
+        <Calendar22 date={inputData.expirationDate} setDate={(date) => setDate(date)} disablePastDates/>
       </TableCell>
       <TableCell>
         <Input value={inputData.brandName} onChange={(e) => setInputData(prev => ({ ...prev, brandName: e.target.value }))} placeholder="Brand Name..." type="text"/>
