@@ -1,7 +1,7 @@
-import { Button } from "@/@models/components/ui/button"
-import { Checkbox } from "@/@models/components/ui/checkbox"
+import { Button } from "@/components/ui/shadcn-io/button"
+import { Checkbox } from "@/components/ui/shadcn-io/checkbox"
 import type { TMedicationWithInventorySchema } from "@/models/medication/schema"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/@models/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/shadcn-io/dropdown-menu"
 import type { Column, ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 

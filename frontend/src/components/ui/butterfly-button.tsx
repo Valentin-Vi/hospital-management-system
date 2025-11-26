@@ -1,5 +1,5 @@
-import { Button } from "@/@models/components/ui/button"
-import { ButtonGroup } from "@/@models/components/ui/button-group";
+import { Button } from "@/components/ui/shadcn-io/button"
+import { ButtonGroup } from "@/components/ui/shadcn-io/button-group";
 import { Trash2, X, type LucideProps } from "lucide-react";
 import { useRef, useState } from "react"
 

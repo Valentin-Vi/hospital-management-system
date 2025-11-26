@@ -3,18 +3,18 @@ import {
   flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable,
   type ColumnFiltersState, type PaginationState, type SortingState, type VisibilityState,
 } from "@tanstack/react-table"
-import { Button } from "@/@models/components/ui/button"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/@models/components/ui/dropdown-menu"
-import { Input } from "@/@models/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/@models/components/ui/table"
+import { Button } from "@/components/ui/shadcn-io/button"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/shadcn-io/dropdown-menu"
+import { Input } from "@/components/ui/shadcn-io/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/shadcn-io/table"
 import { ChevronDown, CirclePlus, Trash2 } from "lucide-react"
 
 import { type TMedicationWithInventorySchema } from "@/models/medication/schema.ts"
 
 import columns from "./columns"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import useBackend from "@/hooks/BackendProvider"
-import { InputRow } from "../../components/table/input-row.tsx.tsx"
+import useBackend from "@/components/hooks/BackendProvider.tsx"
+import { InputRow } from "@/components/table/input-row.tsx"
 import { ButterflyButton } from "@/components/ui/butterfly-button.tsx"
 
 const tableProps = {

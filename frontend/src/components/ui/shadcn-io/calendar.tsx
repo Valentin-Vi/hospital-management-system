@@ -6,8 +6,8 @@ import {
 } from "lucide-react"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 
-import { cn } from "@/@models/lib/utils"
-import { Button, buttonVariants } from "src/@models/components/ui/button"
+import { cn } from "@/utils/cn"
+import { Button, buttonVariants } from "@/components/ui/shadcn-io/button"
 
 function Calendar({
   className,

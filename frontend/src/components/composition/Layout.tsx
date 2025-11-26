@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { Navbar01 } from "../ui/shadcn-io/navbar-01";
+import { Navbar01 } from "../navigation/NavBar";
 
 export default function Layout() {
   return (

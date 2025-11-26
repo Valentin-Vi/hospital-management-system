@@ -3,13 +3,13 @@
 import * as React from "react"
 import { ChevronDownIcon } from "lucide-react"
 
-import { Button } from "@/@models/components/ui/button"
-import { Calendar } from "@/@models/components/ui/calendar"
+import { Button } from "@/components/ui/shadcn-io/button"
+import { Calendar } from "@/components/ui/shadcn-io/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/@models/components/ui/popover"
+} from "@/components/ui/shadcn-io/popover"
 
 export type Calendar22Props = {
   date: Date | undefined
