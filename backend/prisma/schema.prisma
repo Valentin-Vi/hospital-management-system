@@ -68,24 +68,34 @@ model Admin {
 
 model Inventory {
   inventoryId      Int        @id @unique @default(autoincrement())
-  productId        Int        @unique
+  medicationId     Int        @unique
   quantity         Int        @default(0)
   minimum_quantity Int        @default(0)
-  medication       Medication @relation(fields: [productId], references: [medicationId])
+  medication       Medication @relation(fields: [medicationId], references: [medicationId])
 
   @@map("inventory")
+}
+
+model Batch {
+  batchId        Int        @id @unique @default(autoincrement())
+  medicationId   Int
+  quantity       Int
+  expiration_date DateTime
+  medication     Medication @relation(fields: [medicationId], references: [medicationId])
+
+  @@map("batches")
 }
 
 model Medication {
   medicationId   Int      @id @unique @default(autoincrement())
   name            String
   category        String
-  expiration_date DateTime
   brand_name      String
   generic_name    String
   strength        String
   form            String
   inventory       Inventory?
+  batches         Batch[]
 
   @@map("medications")
 }

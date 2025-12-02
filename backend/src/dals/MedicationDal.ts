@@ -16,7 +16,6 @@ class MedicationDal {
       data: {
         name: medication.name,
         category: medication.category,
-        expiration_date: medication.expirationDate,
         brand_name: medication.brandName,
         generic_name: medication.genericName,
         strength: medication.strength,
@@ -33,7 +32,7 @@ class MedicationDal {
   }
 
   async getPaginatedMedications(page: number, limit: number): Promise<Medication[]> {
-    const prismaMedications = await this.prisma.medication.findMany({ 
+    const prismaMedications = await this.prisma.medication.findMany({
       skip: page * limit,
       take: limit,
       orderBy: { medicationId: 'desc' }
@@ -42,9 +41,9 @@ class MedicationDal {
   }
 
   async getFilteredPaginatedMedications(page: number, limit: number, filter: { column: string, value: string }): Promise<Medication[]> {
-    
-    const allowedColumns = ['medicationId', 'name', 'category', 'expiration_date', 'brand_name', 'generic_name', 'strength', 'form']
-    if(!allowedColumns.includes(filter.column)) {
+
+    const allowedColumns = ['medicationId', 'name', 'category', 'brand_name', 'generic_name', 'strength', 'form']
+    if (!allowedColumns.includes(filter.column)) {
       throw new Error(`Unrecognized filter column: ${filter.column}`)
     }
 
@@ -82,7 +81,7 @@ class MedicationDal {
   async deleteRow(rowId: number): Promise<boolean> {
     return (await this.prisma.$transaction([
       this.prisma.inventory.deleteMany({
-        where: { productId: rowId }, // the FK to Medication
+        where: { medicationId: rowId }, // the FK to Medication
       }),
       this.prisma.medication.delete({
         where: { medicationId: rowId },
@@ -104,7 +103,7 @@ class MedicationDal {
     return (await this.prisma.$transaction([
       this.prisma.inventory.deleteMany({
         where: {
-          productId: {
+          medicationId: {
             in: rowIds
           }
         },
@@ -116,13 +115,12 @@ class MedicationDal {
       }),
     ]) ? true : false)
   }
-  
+
   private _buildOne(prismaMedication: any): Medication {
     return new Medication(
       prismaMedication.medicationId,
       prismaMedication.name,
       prismaMedication.category,
-      prismaMedication.expiration_date,
       prismaMedication.brand_name,
       prismaMedication.generic_name,
       prismaMedication.strength,
@@ -134,7 +132,7 @@ class MedicationDal {
     let medInv = [];
     for (const entry of prismaMedications) {
       const med = this._buildOne(entry)
-      if(entry.inventory) med.inventory = new Inventory(entry.inventory.inventoryId, entry.inventory.productId, entry.inventory.quantity ?? 0, entry.inventory.minimum_quantity);
+      if (entry.inventory) med.inventory = new Inventory(entry.inventory.inventoryId, entry.inventory.medicationId, entry.inventory.quantity ?? 0, entry.inventory.minimum_quantity);
       medInv.push(med)
     }
     return medInv

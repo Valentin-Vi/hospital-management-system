@@ -528,7 +528,7 @@ const MEDICATION_DATA = [
     generic_name: "Paracetamol",
     strength: "120 mg/5 ml",
     form: "Syrup",
-  },{
+  }, {
     name: "Paracetamol 500mg",
     category: "Analgesic",
     expiration_date: new Date("2026-03-15"),
@@ -788,7 +788,7 @@ const MEDICATION_DATA = [
     generic_name: "Paracetamol",
     strength: "120 mg/5 ml",
     form: "Syrup",
-  },{
+  }, {
     name: "Paracetamol 500mg",
     category: "Analgesic",
     expiration_date: new Date("2026-03-15"),
@@ -1213,6 +1213,8 @@ async function main() {
   const createdMedications = [];
 
   for (const med of MEDICATION_DATA) {
+    const { expiration_date, ...medData } = med;
+
     let existing = await prisma.medication.findFirst({
       where: {
         name: med.name,
@@ -1222,31 +1224,40 @@ async function main() {
 
     if (!existing) {
       existing = await prisma.medication.create({
-        data: med,
+        data: medData,
       });
     } else {
       existing = await prisma.medication.update({
         where: { medicationId: existing.medicationId },
-        data: med,
+        data: medData,
       });
     }
+
+    // Create Batch
+    await prisma.batch.create({
+      data: {
+        medicationId: existing.medicationId,
+        expiration_date: expiration_date,
+        quantity: 50, // Default quantity for seed
+      }
+    });
 
     createdMedications.push(existing);
   }
 
-  // create or update items based on productId (this IS unique)
+  // create or update items based on medicationId (this IS unique)
   for (let i = 0; i < createdMedications.length; i++) {
     const med = createdMedications[i];
     const preset = ITEM_PRESETS[i] ?? { quantity: 0, minimum_quantity: 0 };
 
     await prisma.inventory.upsert({
-      where: { productId: med.medicationId },
+      where: { medicationId: med.medicationId },
       update: {
         quantity: preset.quantity,
         minimum_quantity: preset.minimum_quantity,
       },
       create: {
-        productId: med.medicationId,
+        medicationId: med.medicationId,
         quantity: preset.quantity,
         minimum_quantity: preset.minimum_quantity,
       },

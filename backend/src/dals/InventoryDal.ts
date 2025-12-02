@@ -11,7 +11,7 @@ export default class InventoryDal {
     this.prisma = new PrismaClient()
     return this;
   };
-  
+
   async getPaginatedMedications(page: number, limit: number): Promise<TMedicationInventory[]> {
     return this._buildManyFully(
       await this.prisma.medication.findMany({
@@ -33,7 +33,6 @@ export default class InventoryDal {
           entry.medicationId,
           entry.name,
           entry.category,
-          entry.expiration_date,
           entry.brand_name,
           entry.generic_name,
           entry.strength,
@@ -43,7 +42,7 @@ export default class InventoryDal {
           ...med,
           inventory: entry.items
         })
-      } catch(err) {
+      } catch (err) {
         console.error(err)
       }
     }
@@ -60,14 +59,13 @@ export default class InventoryDal {
             entry.medicationId,
             entry.name,
             entry.category,
-            entry.expiration_date,
             entry.brand_name,
             entry.generic_name,
             entry.strength,
             entry.form
           )
         )
-      } catch(err) {
+      } catch (err) {
         console.error(err)
       }
     }

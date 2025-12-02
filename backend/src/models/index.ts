@@ -4,16 +4,18 @@ import Desk from "./Desk";
 import Doctor from "./Doctor";
 import Inventory from "./Inventory";
 import Medication from "./Medication";
+import Batch from "./Batch";
 import Visit from "./Visit";
 import User from "./User";
 
 export {
   User,
   Admin,
-  Client,     
-  Desk,       
-  Doctor,     
-  Visit,      
+  Client,
+  Desk,
+  Doctor,
+  Visit,
   Inventory,
   Medication,
+  Batch,
 };
