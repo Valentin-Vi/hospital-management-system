@@ -6,6 +6,7 @@
   },
   "include": [
     "prisma/seed.ts",
+    "prisma/seedData.ts",
     "src/**/*"
   ]
 }

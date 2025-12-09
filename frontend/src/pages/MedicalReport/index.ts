@@ -1,5 +1,7 @@
-import { MedicalReport } from "./MedicalReport";
+import { InventoryDashboard } from "./MedicalReport";
 
 export {
-  MedicalReport
-}
+  InventoryDashboard
+};
+// Deprecated:
+// export { MedicalReport } from "./MedicalReport";

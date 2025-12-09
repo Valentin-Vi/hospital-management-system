@@ -1,8 +1,6 @@
 import { Medication } from "@models";
 import { PrismaClient } from "@prisma/client";
 import { TMedicationInventory } from "@models/schemas";
-import { TInventorySchema } from "models/schemas/InventorySchema";
-import e from "cors";
 
 export default class InventoryDal {
   private readonly prisma: PrismaClient;
@@ -38,9 +36,15 @@ export default class InventoryDal {
           entry.strength,
           entry.form
         )
+        const inventory = entry.inventory ? {
+          itemId: entry.inventory.inventoryId,
+          productId: entry.inventory.medicationId,
+          quantity: entry.inventory.quantity,
+          minimunQuantity: entry.inventory.minimum_quantity
+        } : undefined;
         medicationInventory.push({
           ...med,
-          inventory: entry.items
+          inventory: inventory
         })
       } catch (err) {
         console.error(err)

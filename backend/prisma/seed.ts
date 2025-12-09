@@ -1,1268 +1,1466 @@
 import { PrismaClient } from "@prisma/client";
 import hashPassword from "../src/utils/hashPassword";
-import bcrypt from "bcrypt";
+import { TAdminSchema, TClientSchema, TDeskSchema, TDoctorSchema, TMedicationSchema } from "@models/schemas";
 
 const prisma = new PrismaClient();
 
-const ADMIN_EMAIL = "admin@mail.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Admin123*";
+const ADMIN: Omit<TAdminSchema, "admin_id" | "userId"> = {
+  email: 'admin@mail.com',
+  password: hashPassword('Admin123*'),
+  firstname: 'admin',
+  lastname: 'admin',
+  enabled: true,
+  type: 'ADMIN',
+}
 
-const MEDICATION_DATA = [
+const CLIENT_DATA: Omit<TClientSchema, 'visits' | 'userId' | 'clientId'>[] = [
   {
-    name: "Paracetamol 500mg",
-    category: "Analgesic",
-    expiration_date: new Date("2026-03-15"),
-    brand_name: "Tylenol",
-    generic_name: "Paracetamol",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Amoxicillin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-11-20"),
-    brand_name: "Amoxil",
-    generic_name: "Amoxicillin",
-    strength: "500 mg",
-    form: "Capsule",
-  },
-  {
-    name: "Ibuprofen 400mg",
-    category: "NSAID",
-    expiration_date: new Date("2026-08-01"),
-    brand_name: "Advil",
-    generic_name: "Ibuprofen",
-    strength: "400 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Loratadine 10mg",
-    category: "Antihistamine",
-    expiration_date: new Date("2027-02-12"),
-    brand_name: "Claritin",
-    generic_name: "Loratadine",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Metformin 850mg",
-    category: "Antidiabetic",
-    expiration_date: new Date("2026-12-30"),
-    brand_name: "Glucophage",
-    generic_name: "Metformin",
-    strength: "850 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Simvastatin 20mg",
-    category: "Antihyperlipidemic",
-    expiration_date: new Date("2027-04-25"),
-    brand_name: "Zocor",
-    generic_name: "Simvastatin",
-    strength: "20 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Omeprazole 20mg",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2026-05-10"),
-    brand_name: "Prilosec",
-    generic_name: "Omeprazole",
-    strength: "20 mg",
-    form: "Capsule",
-  },
-  {
-    name: "Salbutamol 100mcg",
-    category: "Bronchodilator",
-    expiration_date: new Date("2027-09-12"),
-    brand_name: "Ventolin",
-    generic_name: "Salbutamol",
-    strength: "100 mcg",
-    form: "Inhaler",
-  },
-  {
-    name: "Losartan 50mg",
-    category: "Antihypertensive",
-    expiration_date: new Date("2027-06-22"),
-    brand_name: "Cozaar",
-    generic_name: "Losartan",
-    strength: "50 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Atorvastatin 40mg",
-    category: "Antihyperlipidemic",
-    expiration_date: new Date("2026-10-30"),
-    brand_name: "Lipitor",
-    generic_name: "Atorvastatin",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Furosemide 40mg",
-    category: "Diuretic",
-    expiration_date: new Date("2025-09-15"),
-    brand_name: "Lasix",
-    generic_name: "Furosemide",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Prednisone 10mg",
-    category: "Corticosteroid",
-    expiration_date: new Date("2026-07-05"),
-    brand_name: "Deltasone",
-    generic_name: "Prednisone",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Amlodipine 5mg",
-    category: "Antihypertensive",
-    expiration_date: new Date("2027-01-20"),
-    brand_name: "Norvasc",
-    generic_name: "Amlodipine",
-    strength: "5 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Azithromycin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2026-03-14"),
-    brand_name: "Zithromax",
-    generic_name: "Azithromycin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Ciprofloxacin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-12-01"),
-    brand_name: "Cipro",
-    generic_name: "Ciprofloxacin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Pantoprazole 40mg",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-02-05"),
-    brand_name: "Protonix",
-    generic_name: "Pantoprazole",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Hydrochlorothiazide 25mg",
-    category: "Diuretic",
-    expiration_date: new Date("2027-08-19"),
-    brand_name: "Microzide",
-    generic_name: "Hydrochlorothiazide",
-    strength: "25 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Clopidogrel 75mg",
-    category: "Antiplatelet",
-    expiration_date: new Date("2027-09-09"),
-    brand_name: "Plavix",
-    generic_name: "Clopidogrel",
-    strength: "75 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Citalopram 20mg",
-    category: "Antidepressant",
-    expiration_date: new Date("2026-11-11"),
-    brand_name: "Celexa",
-    generic_name: "Citalopram",
-    strength: "20 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Diazepam 5mg",
-    category: "Anxiolytic",
-    expiration_date: new Date("2028-01-01"),
-    brand_name: "Valium",
-    generic_name: "Diazepam",
-    strength: "5 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Cetirizine 10mg",
-    category: "Antihistamine",
-    expiration_date: new Date("2026-09-22"),
-    brand_name: "Zyrtec",
-    generic_name: "Cetirizine",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Salbutamol Syrup 2mg/5ml",
-    category: "Bronchodilator",
-    expiration_date: new Date("2027-03-10"),
-    brand_name: "Ventolin Syrup",
-    generic_name: "Salbutamol",
-    strength: "2 mg/5 ml",
-    form: "Syrup",
-  },
-  {
-    name: "Insulin Glargine 100U/ml",
-    category: "Antidiabetic",
-    expiration_date: new Date("2026-04-19"),
-    brand_name: "Lantus",
-    generic_name: "Insulin Glargine",
-    strength: "100 U/ml",
-    form: "Injection",
-  },
-  {
-    name: "Amoxicillin + Clavulanic Acid 625mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2027-05-15"),
-    brand_name: "Augmentin",
-    generic_name: "Amoxicillin + Clavulanic Acid",
-    strength: "625 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Hydrocortisone Cream 1%",
-    category: "Corticosteroid",
-    expiration_date: new Date("2027-10-21"),
-    brand_name: "Cortizone-10",
-    generic_name: "Hydrocortisone",
-    strength: "1%",
-    form: "Cream",
-  },
-  {
-    name: "Acetylsalicylic Acid 100mg",
-    category: "Antiplatelet",
-    expiration_date: new Date("2026-09-13"),
-    brand_name: "Aspirin",
-    generic_name: "Acetylsalicylic Acid",
-    strength: "100 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Levofloxacin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-08-18"),
-    brand_name: "Levaquin",
-    generic_name: "Levofloxacin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Omeprazole Oral Suspension 10mg/ml",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-11-05"),
-    brand_name: "Losec Suspension",
-    generic_name: "Omeprazole",
-    strength: "10 mg/ml",
-    form: "Suspension",
-  },
-  {
-    name: "Acetaminophen 120mg/5ml",
-    category: "Analgesic",
-    expiration_date: new Date("2026-01-14"),
-    brand_name: "Panadol Children",
-    generic_name: "Paracetamol",
-    strength: "120 mg/5 ml",
-    form: "Syrup",
+    email: 'client@mail.com',
+    password: hashPassword('Client123*'),
+    firstname: 'client',
+    lastname: 'client',
+    enabled: true,
+    type: 'CLIENT',
   }, {
-    name: "Paracetamol 500mg",
-    category: "Analgesic",
-    expiration_date: new Date("2026-03-15"),
-    brand_name: "Tylenol",
-    generic_name: "Paracetamol",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Amoxicillin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-11-20"),
-    brand_name: "Amoxil",
-    generic_name: "Amoxicillin",
-    strength: "500 mg",
-    form: "Capsule",
-  },
-  {
-    name: "Ibuprofen 400mg",
-    category: "NSAID",
-    expiration_date: new Date("2026-08-01"),
-    brand_name: "Advil",
-    generic_name: "Ibuprofen",
-    strength: "400 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Loratadine 10mg",
-    category: "Antihistamine",
-    expiration_date: new Date("2027-02-12"),
-    brand_name: "Claritin",
-    generic_name: "Loratadine",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Metformin 850mg",
-    category: "Antidiabetic",
-    expiration_date: new Date("2026-12-30"),
-    brand_name: "Glucophage",
-    generic_name: "Metformin",
-    strength: "850 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Simvastatin 20mg",
-    category: "Antihyperlipidemic",
-    expiration_date: new Date("2027-04-25"),
-    brand_name: "Zocor",
-    generic_name: "Simvastatin",
-    strength: "20 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Omeprazole 20mg",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2026-05-10"),
-    brand_name: "Prilosec",
-    generic_name: "Omeprazole",
-    strength: "20 mg",
-    form: "Capsule",
-  },
-  {
-    name: "Salbutamol 100mcg",
-    category: "Bronchodilator",
-    expiration_date: new Date("2027-09-12"),
-    brand_name: "Ventolin",
-    generic_name: "Salbutamol",
-    strength: "100 mcg",
-    form: "Inhaler",
-  },
-  {
-    name: "Losartan 50mg",
-    category: "Antihypertensive",
-    expiration_date: new Date("2027-06-22"),
-    brand_name: "Cozaar",
-    generic_name: "Losartan",
-    strength: "50 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Atorvastatin 40mg",
-    category: "Antihyperlipidemic",
-    expiration_date: new Date("2026-10-30"),
-    brand_name: "Lipitor",
-    generic_name: "Atorvastatin",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Furosemide 40mg",
-    category: "Diuretic",
-    expiration_date: new Date("2025-09-15"),
-    brand_name: "Lasix",
-    generic_name: "Furosemide",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Prednisone 10mg",
-    category: "Corticosteroid",
-    expiration_date: new Date("2026-07-05"),
-    brand_name: "Deltasone",
-    generic_name: "Prednisone",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Amlodipine 5mg",
-    category: "Antihypertensive",
-    expiration_date: new Date("2027-01-20"),
-    brand_name: "Norvasc",
-    generic_name: "Amlodipine",
-    strength: "5 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Azithromycin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2026-03-14"),
-    brand_name: "Zithromax",
-    generic_name: "Azithromycin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Ciprofloxacin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-12-01"),
-    brand_name: "Cipro",
-    generic_name: "Ciprofloxacin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Pantoprazole 40mg",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-02-05"),
-    brand_name: "Protonix",
-    generic_name: "Pantoprazole",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Hydrochlorothiazide 25mg",
-    category: "Diuretic",
-    expiration_date: new Date("2027-08-19"),
-    brand_name: "Microzide",
-    generic_name: "Hydrochlorothiazide",
-    strength: "25 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Clopidogrel 75mg",
-    category: "Antiplatelet",
-    expiration_date: new Date("2027-09-09"),
-    brand_name: "Plavix",
-    generic_name: "Clopidogrel",
-    strength: "75 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Citalopram 20mg",
-    category: "Antidepressant",
-    expiration_date: new Date("2026-11-11"),
-    brand_name: "Celexa",
-    generic_name: "Citalopram",
-    strength: "20 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Diazepam 5mg",
-    category: "Anxiolytic",
-    expiration_date: new Date("2028-01-01"),
-    brand_name: "Valium",
-    generic_name: "Diazepam",
-    strength: "5 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Cetirizine 10mg",
-    category: "Antihistamine",
-    expiration_date: new Date("2026-09-22"),
-    brand_name: "Zyrtec",
-    generic_name: "Cetirizine",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Salbutamol Syrup 2mg/5ml",
-    category: "Bronchodilator",
-    expiration_date: new Date("2027-03-10"),
-    brand_name: "Ventolin Syrup",
-    generic_name: "Salbutamol",
-    strength: "2 mg/5 ml",
-    form: "Syrup",
-  },
-  {
-    name: "Insulin Glargine 100U/ml",
-    category: "Antidiabetic",
-    expiration_date: new Date("2026-04-19"),
-    brand_name: "Lantus",
-    generic_name: "Insulin Glargine",
-    strength: "100 U/ml",
-    form: "Injection",
-  },
-  {
-    name: "Amoxicillin + Clavulanic Acid 625mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2027-05-15"),
-    brand_name: "Augmentin",
-    generic_name: "Amoxicillin + Clavulanic Acid",
-    strength: "625 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Hydrocortisone Cream 1%",
-    category: "Corticosteroid",
-    expiration_date: new Date("2027-10-21"),
-    brand_name: "Cortizone-10",
-    generic_name: "Hydrocortisone",
-    strength: "1%",
-    form: "Cream",
-  },
-  {
-    name: "Acetylsalicylic Acid 100mg",
-    category: "Antiplatelet",
-    expiration_date: new Date("2026-09-13"),
-    brand_name: "Aspirin",
-    generic_name: "Acetylsalicylic Acid",
-    strength: "100 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Levofloxacin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-08-18"),
-    brand_name: "Levaquin",
-    generic_name: "Levofloxacin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Omeprazole Oral Suspension 10mg/ml",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-11-05"),
-    brand_name: "Losec Suspension",
-    generic_name: "Omeprazole",
-    strength: "10 mg/ml",
-    form: "Suspension",
-  },
-  {
-    name: "Acetaminophen 120mg/5ml",
-    category: "Analgesic",
-    expiration_date: new Date("2026-01-14"),
-    brand_name: "Panadol Children",
-    generic_name: "Paracetamol",
-    strength: "120 mg/5 ml",
-    form: "Syrup",
+    email: 'client2@mail.com',
+    password: hashPassword('Client123*'),
+    firstname: 'client2',
+    lastname: 'client',
+    enabled: true,
+    type: 'CLIENT',
   }, {
-    name: "Paracetamol 500mg",
-    category: "Analgesic",
-    expiration_date: new Date("2026-03-15"),
-    brand_name: "Tylenol",
-    generic_name: "Paracetamol",
-    strength: "500 mg",
-    form: "Tablet",
-  },
+    email: 'client3@mail.com',
+    password: hashPassword('Client123*'),
+    firstname: 'client3',
+    lastname: 'client',
+    enabled: true,
+    type: 'CLIENT',
+  }
+]
+
+const DOCTOR_DATA: Omit<TDoctorSchema, 'userId' | 'doctorId' | 'visits'>[] = [
   {
-    name: "Amoxicillin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-11-20"),
-    brand_name: "Amoxil",
-    generic_name: "Amoxicillin",
-    strength: "500 mg",
-    form: "Capsule",
-  },
-  {
-    name: "Ibuprofen 400mg",
-    category: "NSAID",
-    expiration_date: new Date("2026-08-01"),
-    brand_name: "Advil",
-    generic_name: "Ibuprofen",
-    strength: "400 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Loratadine 10mg",
-    category: "Antihistamine",
-    expiration_date: new Date("2027-02-12"),
-    brand_name: "Claritin",
-    generic_name: "Loratadine",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Metformin 850mg",
-    category: "Antidiabetic",
-    expiration_date: new Date("2026-12-30"),
-    brand_name: "Glucophage",
-    generic_name: "Metformin",
-    strength: "850 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Simvastatin 20mg",
-    category: "Antihyperlipidemic",
-    expiration_date: new Date("2027-04-25"),
-    brand_name: "Zocor",
-    generic_name: "Simvastatin",
-    strength: "20 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Omeprazole 20mg",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2026-05-10"),
-    brand_name: "Prilosec",
-    generic_name: "Omeprazole",
-    strength: "20 mg",
-    form: "Capsule",
-  },
-  {
-    name: "Salbutamol 100mcg",
-    category: "Bronchodilator",
-    expiration_date: new Date("2027-09-12"),
-    brand_name: "Ventolin",
-    generic_name: "Salbutamol",
-    strength: "100 mcg",
-    form: "Inhaler",
-  },
-  {
-    name: "Losartan 50mg",
-    category: "Antihypertensive",
-    expiration_date: new Date("2027-06-22"),
-    brand_name: "Cozaar",
-    generic_name: "Losartan",
-    strength: "50 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Atorvastatin 40mg",
-    category: "Antihyperlipidemic",
-    expiration_date: new Date("2026-10-30"),
-    brand_name: "Lipitor",
-    generic_name: "Atorvastatin",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Furosemide 40mg",
-    category: "Diuretic",
-    expiration_date: new Date("2025-09-15"),
-    brand_name: "Lasix",
-    generic_name: "Furosemide",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Prednisone 10mg",
-    category: "Corticosteroid",
-    expiration_date: new Date("2026-07-05"),
-    brand_name: "Deltasone",
-    generic_name: "Prednisone",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Amlodipine 5mg",
-    category: "Antihypertensive",
-    expiration_date: new Date("2027-01-20"),
-    brand_name: "Norvasc",
-    generic_name: "Amlodipine",
-    strength: "5 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Azithromycin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2026-03-14"),
-    brand_name: "Zithromax",
-    generic_name: "Azithromycin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Ciprofloxacin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-12-01"),
-    brand_name: "Cipro",
-    generic_name: "Ciprofloxacin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Pantoprazole 40mg",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-02-05"),
-    brand_name: "Protonix",
-    generic_name: "Pantoprazole",
-    strength: "40 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Hydrochlorothiazide 25mg",
-    category: "Diuretic",
-    expiration_date: new Date("2027-08-19"),
-    brand_name: "Microzide",
-    generic_name: "Hydrochlorothiazide",
-    strength: "25 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Clopidogrel 75mg",
-    category: "Antiplatelet",
-    expiration_date: new Date("2027-09-09"),
-    brand_name: "Plavix",
-    generic_name: "Clopidogrel",
-    strength: "75 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Citalopram 20mg",
-    category: "Antidepressant",
-    expiration_date: new Date("2026-11-11"),
-    brand_name: "Celexa",
-    generic_name: "Citalopram",
-    strength: "20 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Diazepam 5mg",
-    category: "Anxiolytic",
-    expiration_date: new Date("2028-01-01"),
-    brand_name: "Valium",
-    generic_name: "Diazepam",
-    strength: "5 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Cetirizine 10mg",
-    category: "Antihistamine",
-    expiration_date: new Date("2026-09-22"),
-    brand_name: "Zyrtec",
-    generic_name: "Cetirizine",
-    strength: "10 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Salbutamol Syrup 2mg/5ml",
-    category: "Bronchodilator",
-    expiration_date: new Date("2027-03-10"),
-    brand_name: "Ventolin Syrup",
-    generic_name: "Salbutamol",
-    strength: "2 mg/5 ml",
-    form: "Syrup",
-  },
-  {
-    name: "Insulin Glargine 100U/ml",
-    category: "Antidiabetic",
-    expiration_date: new Date("2026-04-19"),
-    brand_name: "Lantus",
-    generic_name: "Insulin Glargine",
-    strength: "100 U/ml",
-    form: "Injection",
-  },
-  {
-    name: "Amoxicillin + Clavulanic Acid 625mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2027-05-15"),
-    brand_name: "Augmentin",
-    generic_name: "Amoxicillin + Clavulanic Acid",
-    strength: "625 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Hydrocortisone Cream 1%",
-    category: "Corticosteroid",
-    expiration_date: new Date("2027-10-21"),
-    brand_name: "Cortizone-10",
-    generic_name: "Hydrocortisone",
-    strength: "1%",
-    form: "Cream",
-  },
-  {
-    name: "Acetylsalicylic Acid 100mg",
-    category: "Antiplatelet",
-    expiration_date: new Date("2026-09-13"),
-    brand_name: "Aspirin",
-    generic_name: "Acetylsalicylic Acid",
-    strength: "100 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Levofloxacin 500mg",
-    category: "Antibiotic",
-    expiration_date: new Date("2025-08-18"),
-    brand_name: "Levaquin",
-    generic_name: "Levofloxacin",
-    strength: "500 mg",
-    form: "Tablet",
-  },
-  {
-    name: "Omeprazole Oral Suspension 10mg/ml",
-    category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-11-05"),
-    brand_name: "Losec Suspension",
-    generic_name: "Omeprazole",
-    strength: "10 mg/ml",
-    form: "Suspension",
-  },
-  {
-    name: "Acetaminophen 120mg/5ml",
-    category: "Analgesic",
-    expiration_date: new Date("2026-01-14"),
-    brand_name: "Panadol Children",
-    generic_name: "Paracetamol",
-    strength: "120 mg/5 ml",
-    form: "Syrup",
+    email: 'doctor@mail.com',
+    password: hashPassword('Doctor123*'),
+    firstname: 'doctor',
+    lastname: 'doctor',
+    enabled: true,
+    specialty: 'Neurologo',
+    type: 'DOCTOR'
   }, {
+    email: 'doctor2@mail.com',
+    password: hashPassword('Doctor123*'),
+    firstname: 'doctor2',
+    lastname: 'doctor',
+    enabled: true,
+    specialty: 'Psicologo',
+    type: 'DOCTOR'
+  }, {
+    email: 'doctor2@mail.com',
+    password: hashPassword('Doctor123*'),
+    firstname: 'doctor2',
+    lastname: 'doctor',
+    enabled: true,
+    specialty: 'Mingocologo',
+    type: 'DOCTOR'
+  }, {
+    email: 'doctor3@mail.com',
+    password: hashPassword('Doctor123*'),
+    firstname: 'doctor3',
+    lastname: 'doctor',
+    enabled: true,
+    specialty: 'Traumatologo',
+    type: 'DOCTOR'
+  }
+]
+
+const DESK_DATA: Omit<TDeskSchema, 'userId' | 'deskId'>[] = [
+  {
+    email: 'desk@mail.com',
+    password: hashPassword('Desk123*'),
+    firstname: 'desk',
+    lastname: 'desk',
+    enabled: true,
+    type: 'DESK'
+  }, {
+    email: 'desk2@mail.com',
+    password: hashPassword('Desk123*'),
+    firstname: 'desk2',
+    lastname: 'desk',
+    enabled: true,
+    type: 'DESK'
+  }
+]
+
+const MEDICATION_DATA: Omit<TMedicationSchema, 'medicationId'>[] = [
+  {
     name: "Paracetamol 500mg",
     category: "Analgesic",
-    expiration_date: new Date("2026-03-15"),
-    brand_name: "Tylenol",
-    generic_name: "Paracetamol",
+    brandName: "Tylenol",
+    genericName: "Paracetamol",
     strength: "500 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-15") }]
+    }
   },
   {
     name: "Amoxicillin 500mg",
     category: "Antibiotic",
-    expiration_date: new Date("2025-11-20"),
-    brand_name: "Amoxil",
-    generic_name: "Amoxicillin",
+    brandName: "Amoxil",
+    genericName: "Amoxicillin",
     strength: "500 mg",
     form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-11-20") }]
+    }
   },
   {
     name: "Ibuprofen 400mg",
     category: "NSAID",
-    expiration_date: new Date("2026-08-01"),
-    brand_name: "Advil",
-    generic_name: "Ibuprofen",
+    brandName: "Advil",
+    genericName: "Ibuprofen",
     strength: "400 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-08-01") }]
+    }
   },
   {
     name: "Loratadine 10mg",
     category: "Antihistamine",
-    expiration_date: new Date("2027-02-12"),
-    brand_name: "Claritin",
-    generic_name: "Loratadine",
+    brandName: "Claritin",
+    genericName: "Loratadine",
     strength: "10 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-12") }]
+    }
   },
   {
     name: "Metformin 850mg",
     category: "Antidiabetic",
-    expiration_date: new Date("2026-12-30"),
-    brand_name: "Glucophage",
-    generic_name: "Metformin",
+    brandName: "Glucophage",
+    genericName: "Metformin",
     strength: "850 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-12-30") }]
+    }
   },
   {
     name: "Simvastatin 20mg",
     category: "Antihyperlipidemic",
-    expiration_date: new Date("2027-04-25"),
-    brand_name: "Zocor",
-    generic_name: "Simvastatin",
+    brandName: "Zocor",
+    genericName: "Simvastatin",
     strength: "20 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-04-25") }]
+    }
   },
   {
     name: "Omeprazole 20mg",
     category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2026-05-10"),
-    brand_name: "Prilosec",
-    generic_name: "Omeprazole",
+    brandName: "Prilosec",
+    genericName: "Omeprazole",
     strength: "20 mg",
     form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-05-10") }]
+    }
   },
   {
     name: "Salbutamol 100mcg",
     category: "Bronchodilator",
-    expiration_date: new Date("2027-09-12"),
-    brand_name: "Ventolin",
-    generic_name: "Salbutamol",
+    brandName: "Ventolin",
+    genericName: "Salbutamol",
     strength: "100 mcg",
     form: "Inhaler",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-12") }]
+    }
   },
   {
     name: "Losartan 50mg",
     category: "Antihypertensive",
-    expiration_date: new Date("2027-06-22"),
-    brand_name: "Cozaar",
-    generic_name: "Losartan",
+    brandName: "Cozaar",
+    genericName: "Losartan",
     strength: "50 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-06-22") }]
+    }
   },
   {
     name: "Atorvastatin 40mg",
     category: "Antihyperlipidemic",
-    expiration_date: new Date("2026-10-30"),
-    brand_name: "Lipitor",
-    generic_name: "Atorvastatin",
+    brandName: "Lipitor",
+    genericName: "Atorvastatin",
     strength: "40 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-10-30") }]
+    }
   },
   {
     name: "Furosemide 40mg",
     category: "Diuretic",
-    expiration_date: new Date("2025-09-15"),
-    brand_name: "Lasix",
-    generic_name: "Furosemide",
+    brandName: "Lasix",
+    genericName: "Furosemide",
     strength: "40 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-09-15") }]
+    }
   },
   {
     name: "Prednisone 10mg",
     category: "Corticosteroid",
-    expiration_date: new Date("2026-07-05"),
-    brand_name: "Deltasone",
-    generic_name: "Prednisone",
+    brandName: "Deltasone",
+    genericName: "Prednisone",
     strength: "10 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-07-05") }]
+    }
   },
   {
     name: "Amlodipine 5mg",
     category: "Antihypertensive",
-    expiration_date: new Date("2027-01-20"),
-    brand_name: "Norvasc",
-    generic_name: "Amlodipine",
+    brandName: "Norvasc",
+    genericName: "Amlodipine",
     strength: "5 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-01-20") }]
+    }
   },
   {
     name: "Azithromycin 500mg",
     category: "Antibiotic",
-    expiration_date: new Date("2026-03-14"),
-    brand_name: "Zithromax",
-    generic_name: "Azithromycin",
+    brandName: "Zithromax",
+    genericName: "Azithromycin",
     strength: "500 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-14") }]
+    }
   },
   {
     name: "Ciprofloxacin 500mg",
     category: "Antibiotic",
-    expiration_date: new Date("2025-12-01"),
-    brand_name: "Cipro",
-    generic_name: "Ciprofloxacin",
+    brandName: "Cipro",
+    genericName: "Ciprofloxacin",
     strength: "500 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-12-01") }]
+    }
   },
   {
     name: "Pantoprazole 40mg",
     category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-02-05"),
-    brand_name: "Protonix",
-    generic_name: "Pantoprazole",
+    brandName: "Protonix",
+    genericName: "Pantoprazole",
     strength: "40 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-05") }]
+    }
   },
   {
     name: "Hydrochlorothiazide 25mg",
     category: "Diuretic",
-    expiration_date: new Date("2027-08-19"),
-    brand_name: "Microzide",
-    generic_name: "Hydrochlorothiazide",
+    brandName: "Microzide",
+    genericName: "Hydrochlorothiazide",
     strength: "25 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-08-19") }]
+    }
   },
   {
     name: "Clopidogrel 75mg",
     category: "Antiplatelet",
-    expiration_date: new Date("2027-09-09"),
-    brand_name: "Plavix",
-    generic_name: "Clopidogrel",
+    brandName: "Plavix",
+    genericName: "Clopidogrel",
     strength: "75 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-09") }]
+    }
   },
   {
     name: "Citalopram 20mg",
     category: "Antidepressant",
-    expiration_date: new Date("2026-11-11"),
-    brand_name: "Celexa",
-    generic_name: "Citalopram",
+    brandName: "Celexa",
+    genericName: "Citalopram",
     strength: "20 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-11-11") }]
+    }
   },
   {
     name: "Diazepam 5mg",
     category: "Anxiolytic",
-    expiration_date: new Date("2028-01-01"),
-    brand_name: "Valium",
-    generic_name: "Diazepam",
+    brandName: "Valium",
+    genericName: "Diazepam",
     strength: "5 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2028-01-01") }]
+    }
   },
   {
     name: "Cetirizine 10mg",
     category: "Antihistamine",
-    expiration_date: new Date("2026-09-22"),
-    brand_name: "Zyrtec",
-    generic_name: "Cetirizine",
+    brandName: "Zyrtec",
+    genericName: "Cetirizine",
     strength: "10 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-22") }]
+    }
   },
   {
     name: "Salbutamol Syrup 2mg/5ml",
     category: "Bronchodilator",
-    expiration_date: new Date("2027-03-10"),
-    brand_name: "Ventolin Syrup",
-    generic_name: "Salbutamol",
+    brandName: "Ventolin Syrup",
+    genericName: "Salbutamol",
     strength: "2 mg/5 ml",
     form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-03-10") }]
+    }
   },
   {
     name: "Insulin Glargine 100U/ml",
     category: "Antidiabetic",
-    expiration_date: new Date("2026-04-19"),
-    brand_name: "Lantus",
-    generic_name: "Insulin Glargine",
+    brandName: "Lantus",
+    genericName: "Insulin Glargine",
     strength: "100 U/ml",
     form: "Injection",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-04-19") }]
+    }
   },
   {
     name: "Amoxicillin + Clavulanic Acid 625mg",
     category: "Antibiotic",
-    expiration_date: new Date("2027-05-15"),
-    brand_name: "Augmentin",
-    generic_name: "Amoxicillin + Clavulanic Acid",
+    brandName: "Augmentin",
+    genericName: "Amoxicillin + Clavulanic Acid",
     strength: "625 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-05-15") }]
+    }
   },
   {
     name: "Hydrocortisone Cream 1%",
     category: "Corticosteroid",
-    expiration_date: new Date("2027-10-21"),
-    brand_name: "Cortizone-10",
-    generic_name: "Hydrocortisone",
+    brandName: "Cortizone-10",
+    genericName: "Hydrocortisone",
     strength: "1%",
     form: "Cream",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-10-21") }]
+    }
   },
   {
     name: "Acetylsalicylic Acid 100mg",
     category: "Antiplatelet",
-    expiration_date: new Date("2026-09-13"),
-    brand_name: "Aspirin",
-    generic_name: "Acetylsalicylic Acid",
+    brandName: "Aspirin",
+    genericName: "Acetylsalicylic Acid",
     strength: "100 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-13") }]
+    }
   },
   {
     name: "Levofloxacin 500mg",
     category: "Antibiotic",
-    expiration_date: new Date("2025-08-18"),
-    brand_name: "Levaquin",
-    generic_name: "Levofloxacin",
+    brandName: "Levaquin",
+    genericName: "Levofloxacin",
     strength: "500 mg",
     form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-08-18") }]
+    }
   },
   {
     name: "Omeprazole Oral Suspension 10mg/ml",
     category: "Proton Pump Inhibitor",
-    expiration_date: new Date("2027-11-05"),
-    brand_name: "Losec Suspension",
-    generic_name: "Omeprazole",
+    brandName: "Losec Suspension",
+    genericName: "Omeprazole",
     strength: "10 mg/ml",
     form: "Suspension",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-11-05") }]
+    }
   },
   {
     name: "Acetaminophen 120mg/5ml",
     category: "Analgesic",
-    expiration_date: new Date("2026-01-14"),
-    brand_name: "Panadol Children",
-    generic_name: "Paracetamol",
+    brandName: "Panadol Children",
+    genericName: "Paracetamol",
     strength: "120 mg/5 ml",
     form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-01-14") }]
+    }
   },
+  {
+    name: "Paracetamol 500mg",
+    category: "Analgesic",
+    brandName: "Tylenol",
+    genericName: "Paracetamol",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-15") }]
+    }
+  },
+  {
+    name: "Amoxicillin 500mg",
+    category: "Antibiotic",
+    brandName: "Amoxil",
+    genericName: "Amoxicillin",
+    strength: "500 mg",
+    form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-11-20") }]
+    }
+  },
+  {
+    name: "Ibuprofen 400mg",
+    category: "NSAID",
+    brandName: "Advil",
+    genericName: "Ibuprofen",
+    strength: "400 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-08-01") }]
+    }
+  },
+  {
+    name: "Loratadine 10mg",
+    category: "Antihistamine",
+    brandName: "Claritin",
+    genericName: "Loratadine",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-12") }]
+    }
+  },
+  {
+    name: "Metformin 850mg",
+    category: "Antidiabetic",
+    brandName: "Glucophage",
+    genericName: "Metformin",
+    strength: "850 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-12-30") }]
+    }
+  },
+  {
+    name: "Simvastatin 20mg",
+    category: "Antihyperlipidemic",
+    brandName: "Zocor",
+    genericName: "Simvastatin",
+    strength: "20 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-04-25") }]
+    }
+  },
+  {
+    name: "Omeprazole 20mg",
+    category: "Proton Pump Inhibitor",
+    brandName: "Prilosec",
+    genericName: "Omeprazole",
+    strength: "20 mg",
+    form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-05-10") }]
+    }
+  },
+  {
+    name: "Salbutamol 100mcg",
+    category: "Bronchodilator",
+    brandName: "Ventolin",
+    genericName: "Salbutamol",
+    strength: "100 mcg",
+    form: "Inhaler",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-12") }]
+    }
+  },
+  {
+    name: "Losartan 50mg",
+    category: "Antihypertensive",
+    brandName: "Cozaar",
+    genericName: "Losartan",
+    strength: "50 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-06-22") }]
+    }
+  },
+  {
+    name: "Atorvastatin 40mg",
+    category: "Antihyperlipidemic",
+    brandName: "Lipitor",
+    genericName: "Atorvastatin",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-10-30") }]
+    }
+  },
+  {
+    name: "Furosemide 40mg",
+    category: "Diuretic",
+    brandName: "Lasix",
+    genericName: "Furosemide",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-09-15") }]
+    }
+  },
+  {
+    name: "Prednisone 10mg",
+    category: "Corticosteroid",
+    brandName: "Deltasone",
+    genericName: "Prednisone",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-07-05") }]
+    }
+  },
+  {
+    name: "Amlodipine 5mg",
+    category: "Antihypertensive",
+    brandName: "Norvasc",
+    genericName: "Amlodipine",
+    strength: "5 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-01-20") }]
+    }
+  },
+  {
+    name: "Azithromycin 500mg",
+    category: "Antibiotic",
+    brandName: "Zithromax",
+    genericName: "Azithromycin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-14") }]
+    }
+  },
+  {
+    name: "Ciprofloxacin 500mg",
+    category: "Antibiotic",
+    brandName: "Cipro",
+    genericName: "Ciprofloxacin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-12-01") }]
+    }
+  },
+  {
+    name: "Pantoprazole 40mg",
+    category: "Proton Pump Inhibitor",
+    brandName: "Protonix",
+    genericName: "Pantoprazole",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-05") }]
+    }
+  },
+  {
+    name: "Hydrochlorothiazide 25mg",
+    category: "Diuretic",
+    brandName: "Microzide",
+    genericName: "Hydrochlorothiazide",
+    strength: "25 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-08-19") }]
+    }
+  },
+  {
+    name: "Clopidogrel 75mg",
+    category: "Antiplatelet",
+    brandName: "Plavix",
+    genericName: "Clopidogrel",
+    strength: "75 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-09") }]
+    }
+  },
+  {
+    name: "Citalopram 20mg",
+    category: "Antidepressant",
+    brandName: "Celexa",
+    genericName: "Citalopram",
+    strength: "20 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-11-11") }]
+    }
+  },
+  {
+    name: "Diazepam 5mg",
+    category: "Anxiolytic",
+    brandName: "Valium",
+    genericName: "Diazepam",
+    strength: "5 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2028-01-01") }]
+    }
+  },
+  {
+    name: "Cetirizine 10mg",
+    category: "Antihistamine",
+    brandName: "Zyrtec",
+    genericName: "Cetirizine",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-22") }]
+    }
+  },
+  {
+    name: "Salbutamol Syrup 2mg/5ml",
+    category: "Bronchodilator",
+    brandName: "Ventolin Syrup",
+    genericName: "Salbutamol",
+    strength: "2 mg/5 ml",
+    form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-03-10") }]
+    }
+  },
+  {
+    name: "Insulin Glargine 100U/ml",
+    category: "Antidiabetic",
+    brandName: "Lantus",
+    genericName: "Insulin Glargine",
+    strength: "100 U/ml",
+    form: "Injection",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-04-19") }]
+    }
+  },
+  {
+    name: "Amoxicillin + Clavulanic Acid 625mg",
+    category: "Antibiotic",
+    brandName: "Augmentin",
+    genericName: "Amoxicillin + Clavulanic Acid",
+    strength: "625 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-05-15") }]
+    }
+  },
+  {
+    name: "Hydrocortisone Cream 1%",
+    category: "Corticosteroid",
+    brandName: "Cortizone-10",
+    genericName: "Hydrocortisone",
+    strength: "1%",
+    form: "Cream",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-10-21") }]
+    }
+  },
+  {
+    name: "Acetylsalicylic Acid 100mg",
+    category: "Antiplatelet",
+    brandName: "Aspirin",
+    genericName: "Acetylsalicylic Acid",
+    strength: "100 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-13") }]
+    }
+  },
+  {
+    name: "Levofloxacin 500mg",
+    category: "Antibiotic",
+    brandName: "Levaquin",
+    genericName: "Levofloxacin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-08-18") }]
+    }
+  },
+  {
+    name: "Omeprazole Oral Suspension 10mg/ml",
+    category: "Proton Pump Inhibitor",
+    brandName: "Losec Suspension",
+    genericName: "Omeprazole",
+    strength: "10 mg/ml",
+    form: "Suspension",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-11-05") }]
+    }
+  },
+  {
+    name: "Acetaminophen 120mg/5ml",
+    category: "Analgesic",
+    brandName: "Panadol Children",
+    genericName: "Paracetamol",
+    strength: "120 mg/5 ml",
+    form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-01-14") }]
+    }
+  },
+  {
+    name: "Paracetamol 500mg",
+    category: "Analgesic",
+    brandName: "Tylenol",
+    genericName: "Paracetamol",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-15") }]
+    }
+  },
+  {
+    name: "Amoxicillin 500mg",
+    category: "Antibiotic",
+    brandName: "Amoxil",
+    genericName: "Amoxicillin",
+    strength: "500 mg",
+    form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-11-20") }]
+    }
+  },
+  {
+    name: "Ibuprofen 400mg",
+    category: "NSAID",
+    brandName: "Advil",
+    genericName: "Ibuprofen",
+    strength: "400 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-08-01") }]
+    }
+  },
+  {
+    name: "Loratadine 10mg",
+    category: "Antihistamine",
+    brandName: "Claritin",
+    genericName: "Loratadine",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-12") }]
+    }
+  },
+  {
+    name: "Metformin 850mg",
+    category: "Antidiabetic",
+    brandName: "Glucophage",
+    genericName: "Metformin",
+    strength: "850 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-12-30") }]
+    }
+  },
+  {
+    name: "Simvastatin 20mg",
+    category: "Antihyperlipidemic",
+    brandName: "Zocor",
+    genericName: "Simvastatin",
+    strength: "20 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-04-25") }]
+    }
+  },
+  {
+    name: "Omeprazole 20mg",
+    category: "Proton Pump Inhibitor",
+    brandName: "Prilosec",
+    genericName: "Omeprazole",
+    strength: "20 mg",
+    form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-05-10") }]
+    }
+  },
+  {
+    name: "Salbutamol 100mcg",
+    category: "Bronchodilator",
+    brandName: "Ventolin",
+    genericName: "Salbutamol",
+    strength: "100 mcg",
+    form: "Inhaler",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-12") }]
+    }
+  },
+  {
+    name: "Losartan 50mg",
+    category: "Antihypertensive",
+    brandName: "Cozaar",
+    genericName: "Losartan",
+    strength: "50 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-06-22") }]
+    }
+  },
+  {
+    name: "Atorvastatin 40mg",
+    category: "Antihyperlipidemic",
+    brandName: "Lipitor",
+    genericName: "Atorvastatin",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-10-30") }]
+    }
+  },
+  {
+    name: "Furosemide 40mg",
+    category: "Diuretic",
+    brandName: "Lasix",
+    genericName: "Furosemide",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-09-15") }]
+    }
+  },
+  {
+    name: "Prednisone 10mg",
+    category: "Corticosteroid",
+    brandName: "Deltasone",
+    genericName: "Prednisone",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-07-05") }]
+    }
+  },
+  {
+    name: "Amlodipine 5mg",
+    category: "Antihypertensive",
+    brandName: "Norvasc",
+    genericName: "Amlodipine",
+    strength: "5 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-01-20") }]
+    }
+  },
+  {
+    name: "Azithromycin 500mg",
+    category: "Antibiotic",
+    brandName: "Zithromax",
+    genericName: "Azithromycin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-14") }]
+    }
+  },
+  {
+    name: "Ciprofloxacin 500mg",
+    category: "Antibiotic",
+    brandName: "Cipro",
+    genericName: "Ciprofloxacin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-12-01") }]
+    }
+  },
+  {
+    name: "Pantoprazole 40mg",
+    category: "Proton Pump Inhibitor",
+    brandName: "Protonix",
+    genericName: "Pantoprazole",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-05") }]
+    }
+  },
+  {
+    name: "Hydrochlorothiazide 25mg",
+    category: "Diuretic",
+    brandName: "Microzide",
+    genericName: "Hydrochlorothiazide",
+    strength: "25 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-08-19") }]
+    }
+  },
+  {
+    name: "Clopidogrel 75mg",
+    category: "Antiplatelet",
+    brandName: "Plavix",
+    genericName: "Clopidogrel",
+    strength: "75 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-09") }]
+    }
+  },
+  {
+    name: "Citalopram 20mg",
+    category: "Antidepressant",
+    brandName: "Celexa",
+    genericName: "Citalopram",
+    strength: "20 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-11-11") }]
+    }
+  },
+  {
+    name: "Diazepam 5mg",
+    category: "Anxiolytic",
+    brandName: "Valium",
+    genericName: "Diazepam",
+    strength: "5 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2028-01-01") }]
+    }
+  },
+  {
+    name: "Cetirizine 10mg",
+    category: "Antihistamine",
+    brandName: "Zyrtec",
+    genericName: "Cetirizine",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-22") }]
+    }
+  },
+  {
+    name: "Salbutamol Syrup 2mg/5ml",
+    category: "Bronchodilator",
+    brandName: "Ventolin Syrup",
+    genericName: "Salbutamol",
+    strength: "2 mg/5 ml",
+    form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-03-10") }]
+    }
+  },
+  {
+    name: "Insulin Glargine 100U/ml",
+    category: "Antidiabetic",
+    brandName: "Lantus",
+    genericName: "Insulin Glargine",
+    strength: "100 U/ml",
+    form: "Injection",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-04-19") }]
+    }
+  },
+  {
+    name: "Amoxicillin + Clavulanic Acid 625mg",
+    category: "Antibiotic",
+    brandName: "Augmentin",
+    genericName: "Amoxicillin + Clavulanic Acid",
+    strength: "625 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-05-15") }]
+    }
+  },
+  {
+    name: "Hydrocortisone Cream 1%",
+    category: "Corticosteroid",
+    brandName: "Cortizone-10",
+    genericName: "Hydrocortisone",
+    strength: "1%",
+    form: "Cream",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-10-21") }]
+    }
+  },
+  {
+    name: "Acetylsalicylic Acid 100mg",
+    category: "Antiplatelet",
+    brandName: "Aspirin",
+    genericName: "Acetylsalicylic Acid",
+    strength: "100 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-13") }]
+    }
+  },
+  {
+    name: "Levofloxacin 500mg",
+    category: "Antibiotic",
+    brandName: "Levaquin",
+    genericName: "Levofloxacin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-08-18") }]
+    }
+  },
+  {
+    name: "Omeprazole Oral Suspension 10mg/ml",
+    category: "Proton Pump Inhibitor",
+    brandName: "Losec Suspension",
+    genericName: "Omeprazole",
+    strength: "10 mg/ml",
+    form: "Suspension",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-11-05") }]
+    }
+  },
+  {
+    name: "Acetaminophen 120mg/5ml",
+    category: "Analgesic",
+    brandName: "Panadol Children",
+    genericName: "Paracetamol",
+    strength: "120 mg/5 ml",
+    form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-01-14") }]
+    }
+  },
+  {
+    name: "Paracetamol 500mg",
+    category: "Analgesic",
+    brandName: "Tylenol",
+    genericName: "Paracetamol",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-15") }]
+    }
+  },
+  {
+    name: "Amoxicillin 500mg",
+    category: "Antibiotic",
+    brandName: "Amoxil",
+    genericName: "Amoxicillin",
+    strength: "500 mg",
+    form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-11-20") }]
+    }
+  },
+  {
+    name: "Ibuprofen 400mg",
+    category: "NSAID",
+    brandName: "Advil",
+    genericName: "Ibuprofen",
+    strength: "400 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-08-01") }]
+    }
+  },
+  {
+    name: "Loratadine 10mg",
+    category: "Antihistamine",
+    brandName: "Claritin",
+    genericName: "Loratadine",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-12") }]
+    }
+  },
+  {
+    name: "Metformin 850mg",
+    category: "Antidiabetic",
+    brandName: "Glucophage",
+    genericName: "Metformin",
+    strength: "850 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-12-30") }]
+    }
+  },
+  {
+    name: "Simvastatin 20mg",
+    category: "Antihyperlipidemic",
+    brandName: "Zocor",
+    genericName: "Simvastatin",
+    strength: "20 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-04-25") }]
+    }
+  },
+  {
+    name: "Omeprazole 20mg",
+    category: "Proton Pump Inhibitor",
+    brandName: "Prilosec",
+    genericName: "Omeprazole",
+    strength: "20 mg",
+    form: "Capsule",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-05-10") }]
+    }
+  },
+  {
+    name: "Salbutamol 100mcg",
+    category: "Bronchodilator",
+    brandName: "Ventolin",
+    genericName: "Salbutamol",
+    strength: "100 mcg",
+    form: "Inhaler",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-12") }]
+    }
+  },
+  {
+    name: "Losartan 50mg",
+    category: "Antihypertensive",
+    brandName: "Cozaar",
+    genericName: "Losartan",
+    strength: "50 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-06-22") }]
+    }
+  },
+  {
+    name: "Atorvastatin 40mg",
+    category: "Antihyperlipidemic",
+    brandName: "Lipitor",
+    genericName: "Atorvastatin",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-10-30") }]
+    }
+  },
+  {
+    name: "Furosemide 40mg",
+    category: "Diuretic",
+    brandName: "Lasix",
+    genericName: "Furosemide",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-09-15") }]
+    }
+  },
+  {
+    name: "Prednisone 10mg",
+    category: "Corticosteroid",
+    brandName: "Deltasone",
+    genericName: "Prednisone",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-07-05") }]
+    }
+  },
+  {
+    name: "Amlodipine 5mg",
+    category: "Antihypertensive",
+    brandName: "Norvasc",
+    genericName: "Amlodipine",
+    strength: "5 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-01-20") }]
+    }
+  },
+  {
+    name: "Azithromycin 500mg",
+    category: "Antibiotic",
+    brandName: "Zithromax",
+    genericName: "Azithromycin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-03-14") }]
+    }
+  },
+  {
+    name: "Ciprofloxacin 500mg",
+    category: "Antibiotic",
+    brandName: "Cipro",
+    genericName: "Ciprofloxacin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-12-01") }]
+    }
+  },
+  {
+    name: "Pantoprazole 40mg",
+    category: "Proton Pump Inhibitor",
+    brandName: "Protonix",
+    genericName: "Pantoprazole",
+    strength: "40 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-02-05") }]
+    }
+  },
+  {
+    name: "Hydrochlorothiazide 25mg",
+    category: "Diuretic",
+    brandName: "Microzide",
+    genericName: "Hydrochlorothiazide",
+    strength: "25 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-08-19") }]
+    }
+  },
+  {
+    name: "Clopidogrel 75mg",
+    category: "Antiplatelet",
+    brandName: "Plavix",
+    genericName: "Clopidogrel",
+    strength: "75 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-09-09") }]
+    }
+  },
+  {
+    name: "Citalopram 20mg",
+    category: "Antidepressant",
+    brandName: "Celexa",
+    genericName: "Citalopram",
+    strength: "20 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-11-11") }]
+    }
+  },
+  {
+    name: "Diazepam 5mg",
+    category: "Anxiolytic",
+    brandName: "Valium",
+    genericName: "Diazepam",
+    strength: "5 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2028-01-01") }]
+    }
+  },
+  {
+    name: "Cetirizine 10mg",
+    category: "Antihistamine",
+    brandName: "Zyrtec",
+    genericName: "Cetirizine",
+    strength: "10 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-22") }]
+    }
+  },
+  {
+    name: "Salbutamol Syrup 2mg/5ml",
+    category: "Bronchodilator",
+    brandName: "Ventolin Syrup",
+    genericName: "Salbutamol",
+    strength: "2 mg/5 ml",
+    form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-03-10") }]
+    }
+  },
+  {
+    name: "Insulin Glargine 100U/ml",
+    category: "Antidiabetic",
+    brandName: "Lantus",
+    genericName: "Insulin Glargine",
+    strength: "100 U/ml",
+    form: "Injection",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-04-19") }]
+    }
+  },
+  {
+    name: "Amoxicillin + Clavulanic Acid 625mg",
+    category: "Antibiotic",
+    brandName: "Augmentin",
+    genericName: "Amoxicillin + Clavulanic Acid",
+    strength: "625 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-05-15") }]
+    }
+  },
+  {
+    name: "Hydrocortisone Cream 1%",
+    category: "Corticosteroid",
+    brandName: "Cortizone-10",
+    genericName: "Hydrocortisone",
+    strength: "1%",
+    form: "Cream",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-10-21") }]
+    }
+  },
+  {
+    name: "Acetylsalicylic Acid 100mg",
+    category: "Antiplatelet",
+    brandName: "Aspirin",
+    genericName: "Acetylsalicylic Acid",
+    strength: "100 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-09-13") }]
+    }
+  },
+  {
+    name: "Levofloxacin 500mg",
+    category: "Antibiotic",
+    brandName: "Levaquin",
+    genericName: "Levofloxacin",
+    strength: "500 mg",
+    form: "Tablet",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2025-08-18") }]
+    }
+  },
+  {
+    name: "Omeprazole Oral Suspension 10mg/ml",
+    category: "Proton Pump Inhibitor",
+    brandName: "Losec Suspension",
+    genericName: "Omeprazole",
+    strength: "10 mg/ml",
+    form: "Suspension",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2027-11-05") }]
+    }
+  },
+  {
+    name: "Acetaminophen 120mg/5ml",
+    category: "Analgesic",
+    brandName: "Panadol Children",
+    genericName: "Paracetamol",
+    strength: "120 mg/5 ml",
+    form: "Syrup",
+    batches: {
+      create: [{ quantity: 100, expiration_date: new Date("2026-01-14") }]
+    }
+  }
 ];
 
-const ITEM_PRESETS = [
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
-  { quantity: 100, minimum_quantity: 25 },
-  { quantity: 60, minimum_quantity: 20 },
-  { quantity: 500, minimum_quantity: 150 },
-  { quantity: 400, minimum_quantity: 120 },
-  { quantity: 150, minimum_quantity: 50 },
-  { quantity: 80, minimum_quantity: 30 },
-  { quantity: 120, minimum_quantity: 40 },
-  { quantity: 200, minimum_quantity: 60 },
-  { quantity: 300, minimum_quantity: 100 },
-  { quantity: 250, minimum_quantity: 80 },
+export const VISIT_DATA = [
+  {
+    visit_date: new Date("2025-01-05T10:00:00"),
+    clientId: 1,
+    doctorId: 1,
+  },
+  {
+    visit_date: new Date("2025-01-10T14:30:00"),
+    clientId: 1,
+    doctorId: 2,
+  },
+  {
+    visit_date: new Date("2025-02-02T09:15:00"),
+    clientId: 2,
+    doctorId: 1,
+  },
+  {
+    visit_date: new Date("2025-02-12T16:00:00"),
+    clientId: 2,
+    doctorId: 4,
+  },
+  {
+    visit_date: new Date("2025-03-01T11:45:00"),
+    clientId: 3,
+    doctorId: 3,
+  },
+  {
+    visit_date: new Date("2025-03-22T08:30:00"),
+    clientId: 3,
+    doctorId: 2,
+  },
+  {
+    visit_date: new Date("2025-04-10T15:00:00"),
+    clientId: 1,
+    doctorId: 4,
+  },
+  {
+    visit_date: new Date("2025-04-18T12:10:00"),
+    clientId: 2,
+    doctorId: 3,
+  },
+  {
+    visit_date: new Date("2025-05-03T13:20:00"),
+    clientId: 3,
+    doctorId: 1,
+  }
 ];
-
 
 async function main() {
-  const user = await prisma.user.upsert({
-    where: { email: ADMIN_EMAIL },
-    create: {
-      email: ADMIN_EMAIL,
-      password: hashPassword(ADMIN_PASSWORD),
-      firstname: "admin",
-      lastname: "istrador",
-      type: "ADMIN",
-      enabled: true,
-    },
-    update: {
-      firstname: "admin",
-      lastname: "istrador",
-      type: "ADMIN",
-      enabled: true,
-    },
+  // Create mock ADMIN user
+  await prisma.user.upsert({
+    where: { email: ADMIN.email },
+    create: ADMIN,
+    update: ADMIN,
   });
 
-  if (process.env.ADMIN_PASSWORD) {
-    const same = bcrypt.compareSync(ADMIN_PASSWORD, user.password);
-    if (!same) {
-      await prisma.user.update({
-        where: { userId: user.userId },
-        data: { password: hashPassword(ADMIN_PASSWORD) },
-      });
-    }
+  // Create mock CLIENT users
+  for(const c of CLIENT_DATA) {
+    await prisma.user.upsert({
+      where: { email: c.email },
+      create: c,
+      update: c
+    })
   }
 
-  await prisma.admin.upsert({
-    where: { adminId: user.userId },
-    create: {
-      users: { connect: { userId: user.userId } },
-    },
-    update: {
-      users: { connect: { userId: user.userId } },
-    },
-  });
+  // Create mock MEDICATION rows
+  await prisma.medication.createMany({
+    data: MEDICATION_DATA
+  })
 
-  const createdMedications = [];
-
-  for (const med of MEDICATION_DATA) {
-    const { expiration_date, ...medData } = med;
-
-    let existing = await prisma.medication.findFirst({
-      where: {
-        name: med.name,
-        brand_name: med.brand_name,
-      },
-    });
-
-    if (!existing) {
-      existing = await prisma.medication.create({
-        data: medData,
-      });
-    } else {
-      existing = await prisma.medication.update({
-        where: { medicationId: existing.medicationId },
-        data: medData,
-      });
-    }
-
-    // Create Batch
-    await prisma.batch.create({
-      data: {
-        medicationId: existing.medicationId,
-        expiration_date: expiration_date,
-        quantity: 50, // Default quantity for seed
-      }
-    });
-
-    createdMedications.push(existing);
+  // Create mock DESK users
+  for(const d of DESK_DATA) {
+    await prisma.user.upsert({
+      where: { email: d.email },
+      create: d,
+      update: d
+    })
   }
 
-  // create or update items based on medicationId (this IS unique)
-  for (let i = 0; i < createdMedications.length; i++) {
-    const med = createdMedications[i];
-    const preset = ITEM_PRESETS[i] ?? { quantity: 0, minimum_quantity: 0 };
-
-    await prisma.inventory.upsert({
-      where: { medicationId: med.medicationId },
-      update: {
-        quantity: preset.quantity,
-        minimum_quantity: preset.minimum_quantity,
-      },
-      create: {
-        medicationId: med.medicationId,
-        quantity: preset.quantity,
-        minimum_quantity: preset.minimum_quantity,
-      },
-    });
+  // Create mock DOCTOR users
+  for(const d of DOCTOR_DATA) {
+    await prisma.user.upsert({
+      where: { email: d.email },
+      create: d,
+      update: d
+    })
   }
+
+  // Create mock VISIT rows 
+  await prisma.visit.createMany({ data: VISIT_DATA })
 }
 
 main()

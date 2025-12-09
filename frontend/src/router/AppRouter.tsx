@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import ProtectedRoute from "@/security/ProtectedRoute";
-import { LoginPage, ErrorPage, MedicalReport, MedicationPage } from "@/pages";
+import { LoginPage, ErrorPage, InventoryDashboard, MedicationPage, VisitRequestPage } from "@/pages";
 import Layout from "@/components/composition/Layout";
 
 export default createBrowserRouter([
@@ -48,8 +48,23 @@ export default createBrowserRouter([
         element: <Layout />,
         children: [
           {
-            path: '/report/medical',
-            element: <MedicalReport />
+            path: '/report/inventory',
+            element: <InventoryDashboard />
+          }
+        ]
+      }
+    ]
+  }, {
+    path: '/visit',
+    element: <ProtectedRoute authorizedRoles={['CLIENT', 'ADMIN']} />,
+    children: [
+      {
+        path: '/visit',
+        element: <Layout />,
+        children: [
+          {
+            path: '/visit/request',
+            element: <VisitRequestPage />
           }
         ]
       }

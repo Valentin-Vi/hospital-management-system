@@ -5,7 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AlertTriangle, Archive, Calendar, Package } from "lucide-react";
 
-export const MedicalReport = () => {
+export const InventoryDashboard = () => {
+  // INVENTORY_TYPE should be made a prop or come from context/router for future enhancements
+  const INVENTORY_TYPE = "medication"; // placeholder for extensibility
+
   const [data, setData] = useState<TAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,18 +22,18 @@ export const MedicalReport = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center">Loading dashboard...</div>;
+    return <div className="h-full overflow-y-auto p-8 text-center">Loading dashboard...</div>;
   }
 
   if (!data) {
-    return <div className="p-8 text-center text-red-500">Failed to load dashboard data.</div>;
+    return <div className="h-full overflow-y-auto p-8 text-center text-red-500">Failed to load dashboard data.</div>;
   }
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   return (
-    <div className="p-8 space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">Medical Inventory Report</h1>
+    <div className="h-full overflow-y-auto p-8 space-y-8">
+      <h1 className="text-3xl font-bold tracking-tight">Inventory Dashboard ({INVENTORY_TYPE === "medication" ? "Medications" : "Equipment"})</h1>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

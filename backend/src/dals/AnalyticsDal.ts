@@ -88,7 +88,7 @@ export default class AnalyticsDal {
 
     return Object.entries(distribution).map(([category, count]) => ({
       category,
-      count
+      count: Math.round(count * 10) / 10
     }));
   }
 }
