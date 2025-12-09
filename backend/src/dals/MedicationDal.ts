@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Inventory, Medication } from "@models";
-import { MedicationSchema } from "models/schemas/MedicationSchema";
+import { MedicationSchema } from "models/medication/schema";
 
 class MedicationDal {
 

@@ -11,7 +11,7 @@ model User {
   email     String   @unique
   password  String
   lastname  String
-  userId   Int      @id @unique @default(autoincrement())
+  userId    Int      @id @unique @default(autoincrement())
   type      UserType @default(VISITOR)
   enabled   Boolean  @default(false)
   firstname String   @default("FirstName")
@@ -24,7 +24,7 @@ model User {
 }
 
 model Client {
-  clientId Int     @unique
+  clientId  Int     @unique
   users     User    @relation(fields: [clientId], references: [userId])
   visits    Visit[]
 
@@ -33,7 +33,7 @@ model Client {
 
 model Doctor {
   specialty String
-  doctorId Int     @unique
+  doctorId  Int     @unique
   users     User    @relation(fields: [doctorId], references: [userId])
   visits    Visit[]
 
@@ -42,10 +42,10 @@ model Doctor {
 
 model Visit {
   visit_date    DateTime
-  clientId     Int
+  clientId      Int
   creation_date DateTime @default(now())
-  doctorId     Int
-  visitId      Int      @id @unique @default(autoincrement())
+  doctorId      Int
+  visitId       Int      @id @unique @default(autoincrement())
   clients       Client   @relation(fields: [clientId], references: [clientId])
   doctors       Doctor   @relation(fields: [doctorId], references: [doctorId])
 
@@ -53,48 +53,37 @@ model Visit {
 }
 
 model Desk {
-  deskId Int  @unique
+  deskId  Int  @unique
   users   User @relation(fields: [deskId], references: [userId])
 
   @@map("desks")
 }
 
 model Admin {
-  adminId Int  @unique
+  adminId  Int  @unique
   users    User @relation(fields: [adminId], references: [userId])
 
   @@map("admins")
 }
 
-model Inventory {
-  inventoryId      Int        @id @unique @default(autoincrement())
-  medicationId     Int        @unique
-  quantity         Int        @default(0)
-  minimum_quantity Int        @default(0)
-  medication       Medication @relation(fields: [medicationId], references: [medicationId])
-
-  @@map("inventory")
-}
-
 model Batch {
-  batchId        Int        @id @unique @default(autoincrement())
-  medicationId   Int
-  quantity       Int
+  batchId         Int        @id @unique @default(autoincrement())
+  medicationId    Int
+  quantity        Int
   expiration_date DateTime
-  medication     Medication @relation(fields: [medicationId], references: [medicationId])
+  medication      Medication @relation(fields: [medicationId], references: [medicationId])
 
   @@map("batches")
 }
 
 model Medication {
-  medicationId   Int      @id @unique @default(autoincrement())
+  medicationId    Int      @id @unique @default(autoincrement())
   name            String
   category        String
   brand_name      String
   generic_name    String
   strength        String
   form            String
-  inventory       Inventory?
   batches         Batch[]
 
   @@map("medications")
