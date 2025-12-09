@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UserSchema } from './UserSchema';
+import { UserSchema } from '@/models/user';
 
 export const DeskSchema = UserSchema.extend({
   deskId: z.number().int()

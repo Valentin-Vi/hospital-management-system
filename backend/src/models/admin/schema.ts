@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UserSchema } from './UserSchema';
+import { UserSchema } from '@/models/user';
 
 export const AdminSchema = UserSchema.extend({
   admin_id: z.number().int()

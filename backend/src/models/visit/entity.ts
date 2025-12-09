@@ -1,5 +1,5 @@
-import Client from "./Client";
-import Doctor from "./Doctor";
+import { Client } from "@/models/client";
+import { Doctor } from "@/models/doctor";
 
 class Visit {
   visitId: number = 0;

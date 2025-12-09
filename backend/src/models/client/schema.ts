@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { VisitSchema } from './VisitSchema';
-import { UserSchema } from './UserSchema'
+import { VisitSchema } from '@/models/visit';
+import { UserSchema } from '@/models/user'
 
 export const ClientSchema = UserSchema.extend({
   clientId: z.number().int(),

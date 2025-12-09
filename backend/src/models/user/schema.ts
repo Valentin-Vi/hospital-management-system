@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UserTypeEnumSchema } from './UserTypeEnumSchema';
+import { UserTypeEnumSchema } from '@/models/user';
 
 export const UserSchema = z.object({
   userId: z.number().int(),

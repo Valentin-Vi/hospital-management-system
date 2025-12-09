@@ -1,5 +1,5 @@
-import User from "./User";
-import { TUserSchema } from "@models/schemas";
+import { User } from "@/models/user";
+import { type TUserSchema } from "@/models/user";
 
 class Admin extends User {
   constructor(user: TUserSchema) {

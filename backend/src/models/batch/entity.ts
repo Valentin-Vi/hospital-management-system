@@ -1,4 +1,4 @@
-import Medication from "./Medication";
+import { Medication } from "@/models/medication";
 
 class Batch {
   batchId: number = 0;

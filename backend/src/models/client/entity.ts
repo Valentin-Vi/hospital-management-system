@@ -1,6 +1,6 @@
-import User from './User';
-import Visit from './Visit';
-import type { TUserSchema } from '@models/schemas';
+import { User } from '@/models/user';
+import { Visit } from '@/models/visit';
+import { type TUserSchema } from '@/models/user';
 
 class Client extends User {
 

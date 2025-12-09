@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { UserSchema } from './UserSchema';
-import { VisitSchema } from './VisitSchema';
+import { UserSchema } from '@/models/user';
+import { VisitSchema } from '@/models/visit';
 
 export const DoctorSchema = UserSchema.extend({
     doctorId: z.number().int(),

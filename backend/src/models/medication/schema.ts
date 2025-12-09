@@ -1,6 +1,4 @@
 import { z } from 'zod';
-import { InventorySchema } from './InventorySchema';
-import { BatchSchema } from './Batch';
 
 export const MedicationSchema = z.object({
   medicationId: z.number().int().nonnegative(),           // Prisma: Int @id @default(autoincrement())
@@ -12,9 +10,4 @@ export const MedicationSchema = z.object({
   form: z.string().nonempty().max(200),
 })
 export type TMedicationSchema = z.infer<typeof MedicationSchema>
-
-export const MedicationInventory = MedicationSchema.extend({
-  inventory: InventorySchema.optional()
-})
-export type TMedicationInventory = z.infer<typeof MedicationInventory>
 
