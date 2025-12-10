@@ -21,8 +21,8 @@ app.use(cors({
 }));
 
 // Endpoints
-import { AuthRouter } from '@auth';
-import { adminRouter, medicationRouter, inventoryRouter, analyticsRouter, visitRouter } from "@routers"
+import { AuthRouter } from '@/auth';
+import { adminRouter, medicationRouter, inventoryRouter, analyticsRouter, visitRouter } from "@/routers"
 
 app.use('/auth', AuthRouter)
 app.use('/admin', adminRouter)

@@ -1,7 +1,13 @@
 import AdminService from "./AdminServices";
 import MedicationService from "./MedicationServices";
+import AnalyticsService from "./AnalyticsService";
+import VisitService from "./VisitService";
+import InventoryService from "./InventoryService";
 
 export {
   AdminService,
-  MedicationService
+  MedicationService,
+  AnalyticsService,
+  VisitService,
+  InventoryService
 }

@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { GetPaginatedUsersRequestBodySchema } from "./schemas/TGetPaginatedUsersReuqestBodySchema";
-import { AdminService } from "@services";
-import { User } from "@models";
+import { AdminService } from "@/services";
 
 class AdminController {
 
@@ -35,9 +34,7 @@ class AdminController {
         })
       }
 
-      const { page, limit } = parsedRequestBody.data
-
-      
+      const { page, limit } = parsedRequestBody.data      
 
       return response.status(200).json({
         message: "Request successful.",

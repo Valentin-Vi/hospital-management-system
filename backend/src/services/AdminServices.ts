@@ -1,19 +1,20 @@
-
-import { UserDal } from "@dals";
-import { TIncludeArgs } from "@dals/schemas";
+import { PrismaClient } from "@prisma/client";
+import { UserRepository } from "@/repositories";
 import { TGetPaginatedUsersParams } from "./types/TGetPaginatedUsersParams";
 
 class AdminService {
-  constructor(
-    private readonly userDal: UserDal = new UserDal(),
-    private readonly include: TIncludeArgs = {}
-  ) { }
+  private userRepo: UserRepository;
+
+  constructor() {
+    const prisma = new PrismaClient();
+    this.userRepo = new UserRepository(prisma);
+  }
 
   async getPaginatedUsers({
     page,
     limit
   }: TGetPaginatedUsersParams) {
-    return await this.userDal.getPaginatedUsers({ page, limit });
+    return await this.userRepo.findPaginated(page, limit);
   }
 }
 

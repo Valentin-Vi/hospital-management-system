@@ -1,11 +1,16 @@
-import InventoryDal from "dals/InventoryDal";
+import { PrismaClient } from "@prisma/client";
+import { MedicationQueryRepository } from "@/repositories";
 
 export default class InventoryService {
-  constructor(
-    private readonly inventoryDal: InventoryDal = new InventoryDal()
-  ) {}
+  private medicationQueryRepo: MedicationQueryRepository;
 
-  public async getPaginatedMedications(page: number, limit: number) {
-    return await this.inventoryDal.getPaginatedMedications(page, limit);
+  constructor() {
+    const prisma = new PrismaClient();
+    this.medicationQueryRepo = new MedicationQueryRepository(prisma);
+  }
+
+  async getPaginatedMedications(page: number, limit: number) {
+    return await this.medicationQueryRepo.findPaginated(page, limit);
   }
 }
+
