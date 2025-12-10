@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { type TMedicationInventoryItem } from '../inventory';
 
 export const MedicationSchema = z.object({
   medicationId: z.number().int().nonnegative(),           // Prisma: Int @id @default(autoincrement())
@@ -9,11 +8,7 @@ export const MedicationSchema = z.object({
   genericName: z.string().nonempty().max(200),
   strength: z.string().nonempty().max(200),
   form: z.string().nonempty().max(200),
+  minimum_quantity: z.number().int().min(0).default(0),
 })
 export type TMedicationSchema = z.infer<typeof MedicationSchema>
-
-// Medication with optional inventory information
-export type TMedicationInventory = TMedicationSchema & {
-  inventory?: TMedicationInventoryItem;
-}
 

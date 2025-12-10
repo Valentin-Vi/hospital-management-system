@@ -66,16 +66,6 @@ model Admin {
   @@map("admins")
 }
 
-model Inventory {
-  inventoryId      Int        @id @unique @default(autoincrement())
-  medicationId     Int        @unique
-  quantity         Int        @default(0)
-  minimum_quantity Int        @default(0)
-  medication       Medication @relation(fields: [medicationId], references: [medicationId])
-
-  @@map("inventory")
-}
-
 model Batch {
   batchId        Int        @id @unique @default(autoincrement())
   medicationId   Int
@@ -87,15 +77,15 @@ model Batch {
 }
 
 model Medication {
-  medicationId   Int      @id @unique @default(autoincrement())
-  name            String
-  category        String
-  brand_name      String
-  generic_name    String
-  strength        String
-  form            String
-  inventory       Inventory?
-  batches         Batch[]
+  medicationId     Int      @id @unique @default(autoincrement())
+  name             String
+  category         String
+  brand_name       String
+  generic_name     String
+  strength         String
+  form             String
+  minimum_quantity Int      @default(0)
+  batches          Batch[]
 
   @@map("medications")
 }
