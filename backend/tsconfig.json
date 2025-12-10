@@ -16,7 +16,7 @@
       "@errors": ["./errors"],
       "@models": ["./models"],
       "@models/types": ["./models/types"],
-      "@models/schemas": ["./models/schemas"],
+      "@models/schemas": ["./models/schemas.ts"],
       "@routers": ["./routers"],
       "@utils": ["./utils"],
       "@utils/types": ["./utils/types"],
