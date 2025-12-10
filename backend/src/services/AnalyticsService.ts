@@ -1,10 +1,18 @@
-import AnalyticsDal from "../dals/AnalyticsDal";
+import { PrismaClient } from "@prisma/client";
+import { AnalyticsRepository } from "@/repositories";
+import { MedicationRepository } from "@/repositories";
+import { BatchRepository } from "@/repositories";
 
 export default class AnalyticsService {
-  private dal: AnalyticsDal;
+  private analyticsRepo: AnalyticsRepository;
+  private medicationRepo: MedicationRepository;
+  private batchRepo: BatchRepository;
 
   constructor() {
-    this.dal = new AnalyticsDal();
+    const prisma = new PrismaClient();
+    this.medicationRepo = new MedicationRepository(prisma);
+    this.batchRepo = new BatchRepository(prisma);
+    this.analyticsRepo = new AnalyticsRepository(prisma, this.medicationRepo, this.batchRepo);
   }
 
   async getDashboardMetrics() {
@@ -15,17 +23,12 @@ export default class AnalyticsService {
       totalStock,
       stockDistribution
     ] = await Promise.all([
-      this.dal.getLowStockItems(),
-      this.dal.getExpiredBatches(),
-      this.dal.getExpiringSoonBatches(30),
-      this.dal.getTotalStock(),
-      this.dal.getStockDistributionByCategory()
+      this.analyticsRepo.getLowStockMedications(),
+      this.analyticsRepo.getExpiredBatches(),
+      this.analyticsRepo.getExpiringSoonBatches(30),
+      this.analyticsRepo.getTotalStock(),
+      this.analyticsRepo.getStockDistributionByCategory()
     ]);
-
-    // Calculate Stock Health Ratio (items with quantity > min_quantity / total items)
-    // For this we need total items count.
-    // Let's assume we can get it from stockDistribution or another query.
-    // For now, let's just return the raw numbers.
 
     return {
       kpis: {
@@ -38,21 +41,21 @@ export default class AnalyticsService {
         stockDistribution
       },
       lists: {
-        lowStockItems: lowStockItems.map(item => ({
+        lowStockItems: lowStockItems.map((item: any) => ({
           medicationName: item.medication.name,
-          quantity: item.quantity,
-          minQuantity: item.minimum_quantity
+          quantity: item.totalStock,
+          minQuantity: item.minimumQuantity
         })),
-        expiredBatches: expiredBatches.map(batch => ({
-          medicationName: batch.medication.name,
+        expiredBatches: expiredBatches.map((batch: any) => ({
+          medicationName: batch.medication?.name || 'Unknown',
           batchId: batch.batchId,
-          expirationDate: batch.expiration_date,
+          expirationDate: batch.expirationDate,
           quantity: batch.quantity
         })),
-        expiringSoonBatches: expiringSoonBatches.map(batch => ({
-          medicationName: batch.medication.name,
+        expiringSoonBatches: expiringSoonBatches.map((batch: any) => ({
+          medicationName: batch.medication?.name || 'Unknown',
           batchId: batch.batchId,
-          expirationDate: batch.expiration_date,
+          expirationDate: batch.expirationDate,
           quantity: batch.quantity
         }))
       }
