@@ -1,4 +1,9 @@
-function LoadingPage() {
+import { LoaderCircle } from 'lucide-react';
+
+export const LoadingPage = () => {
+
+    
+
     return (
         <div className="align-middle flex flex-col h-full items-center w-full pt-10 pb-10">
             <span className="text-x text-black font-bold text-center mb-2">

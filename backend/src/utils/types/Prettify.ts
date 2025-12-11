@@ -1,5 +1,3 @@
-type Prettify<T> = {
+export type Prettify<T> = {
   [K in keyof T]: T[K]
 } & {};
-
-export default Prettify;

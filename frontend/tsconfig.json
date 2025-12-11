@@ -11,19 +11,9 @@
     "outDir": "dist",                                   /* Specify an output folder for all emitted files. */
     "moduleResolution": "node",                     /* Specify how TypeScript looks up a file from a given module specifier. */
     "moduleDetection": "force",
-    "baseUrl": "src",                                  /* Specify the base directory to resolve non-relative module names. */
+    "baseUrl": ".",                                  /* Specify the base directory to resolve non-relative module names. */
     "paths": {
-      "@models": ["./models"],
-      "@models/types": ["./models/types"],
-      "@models/schemas": ["./models/schemas"],
-      "@pages": ["./pages"],
-      "@pages/*": ["./pages/*"],
-      "@components": ["./components"],
-      "@components/*": ["./components/*"],
-      "@security": ["./security"],
-      "@security/types": ["./security/types"],
-      "@security/schemas": ["./security/schemas"],
-      "@router": ["./router"]
+      "@/*": ["./src/*"]
     },
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */

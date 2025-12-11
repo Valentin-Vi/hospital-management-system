@@ -1,11 +1,11 @@
-import { AuthService } from "@auth";
-import { SignupInfoSchema } from "@auth/schemas";
-import { LoginInfoSchema } from "@auth/schemas";
-import type { Result } from "@utils/types";
-import { RefreshTokenSchema, type TRefreshToken } from "@auth/schemas";
+import { AuthService } from "@/auth";
+import { SignupInfoSchema } from "@/auth/schemas";
+import { LoginInfoSchema } from "@/auth/schemas";
+import type { Result } from "@/utils/types";
+import { RefreshTokenSchema, type TRefreshToken } from "@/auth/schemas";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { Request, Response } from "express";
-import { hashPassword } from "@utils";
+import { hashPassword } from "@/utils";
 
 class AuthController {
   
@@ -277,14 +277,14 @@ class AuthController {
   }
 
   #clearAuthCookies(response: Response) {
-    response.clearCookie('refreshToken', {
-        httpOnly: true,
-        sameSite: 'none',
-      });
-      response.clearCookie('accessToken', {
-        httpOnly: true,
-        sameSite: 'none',
-      });
+    response.cookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'none',
+    });
+    response.cookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'none',
+    });
   }
 };
 

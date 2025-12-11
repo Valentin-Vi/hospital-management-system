@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { GetPaginatedUsersRequestBodySchema } from "./schemas/TGetPaginatedUsersReuqestBodySchema";
-import { AdminService } from "@services";
-import { User } from "@models";
+import { AdminService } from "@/services";
 
 class AdminController {
 
@@ -35,22 +34,14 @@ class AdminController {
         })
       }
 
-      const { page, limit } = parsedRequestBody.data
-
-      let users = await this.service.getPaginatedUsers({
-        page: page,
-        limit: limit
-      })
-
-      let stringifiedUsers = []
-      for (const user of users) {
-        const parsedUser = user.toJSON();
-        stringifiedUsers.push(parsedUser)
-      }
+      const { page, limit } = parsedRequestBody.data      
 
       return response.status(200).json({
         message: "Request successful.",
-        users: stringifiedUsers
+        users: await this.service.getPaginatedUsers({
+          page: page,
+          limit: limit
+        })
       });
     } catch(err) {
       console.error(err);

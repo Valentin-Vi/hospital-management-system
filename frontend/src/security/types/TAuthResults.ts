@@ -1,4 +1,4 @@
-import type { TUserInfoSchema } from "@security/schemas"
+import type { TUserInfoSchema } from "@/security/schemas"
 
 type TLoginResult = {
   ok: true,

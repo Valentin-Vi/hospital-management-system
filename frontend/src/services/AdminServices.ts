@@ -1,4 +1,4 @@
-import type { TUserSchema } from "@models/schemas";
+import type { TUserSchema } from "@/models/schemas";
 
 class AdminServices {
 

@@ -1,7 +1,7 @@
-import type { TLoginParams, TSignupParams, TUserInfoSchema } from '@security/schemas'
+import type { TLoginParams, TSignupParams, TUserInfoSchema } from '@/security/schemas'
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LoginResponseBodySchema } from "./schemas/LoginSchema";
+import { loginResponseBodySchema } from "./schemas/LoginSchema";
 import fetchAuth from './fetchAuth';
 import type { TLoginResult } from './types/TAuthResults';
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import RefreshResponseBodySchema from './schemas/RefreshSchema';
 export type TAuthContext = {
   user: TUserInfoSchema | undefined,
   setUser: React.Dispatch<React.SetStateAction<TUserInfoSchema | undefined>>,
+  getIsLoggedIn: () => boolean,
   login: (params: TLoginParams) => Promise<TLoginResult>,
   signup: (userInfo: TSignupParams) => Promise<{
     ok: boolean,
@@ -20,11 +21,11 @@ export type TAuthContext = {
   }>
 }
 
-const defaultUserData = {
+const defaultUserData: TUserInfoSchema = {
   email: '',
   firstname: '',
   lastname: '',
-  type: 'VISITOR' as const // UserTypeEnumSchema.Enum['VISITOR']
+  type: 'VISITOR'
 };
 
 const AuthContext = createContext<TAuthContext>({} as TAuthContext);
@@ -65,7 +66,7 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
     });
 
     const json = await response.json();
-    const parsed = LoginResponseBodySchema.safeParse(json);
+    const parsed = loginResponseBodySchema.safeParse(json);
 
     if(!response.ok || !parsed.success) {
       const message = parsed.success ? (parsed.data.message ?? 'Login failed') : 'Invalid log-in schema';
@@ -110,13 +111,18 @@ export function AuthProvider({ children }: { children?: ReactNode }) {
     }
   }
 
+  const getIsLoggedIn = (): boolean => {
+    return (user?.email ? true : false);
+  }
+
   return (
     <AuthContext.Provider value={{
       user,
       setUser,
       signup,
       login,
-      logout
+      logout,
+      getIsLoggedIn
     }}>
       { children }
     </AuthContext.Provider>

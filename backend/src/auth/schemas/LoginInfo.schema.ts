@@ -1,4 +1,4 @@
-import { UserSchema } from "@models/schemas";
+import { UserSchema } from "@/models/schemas";
 import { z } from "zod";
 
 export const LoginInfoSchema = UserSchema.pick({

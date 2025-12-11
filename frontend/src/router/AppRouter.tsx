@@ -1,14 +1,13 @@
 import { createBrowserRouter, Navigate } from "react-router";
-import ProtectedRoute from "security/ProtectedRoute";
-import LoginPage from "pages/LoginPage/LoginPage";
-import Layout from "@components/composition/Layout";
-import ErrorPage from "pages/ErrorPage/ErrorPage";
-import MedicationPage from "pages/MedicationPage/MedicationPage";
+import ProtectedRoute from "@/security/ProtectedRoute";
+import { LoginPage, ErrorPage, InventoryDashboard, MedicationPage, VisitRequestPage } from "@/pages";
+import Layout from "@/components/composition/Layout";
 
 export default createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to='/auth/login'/>
+    element: <Navigate to='/auth/login'/>,
+    errorElement: <Navigate to='/error' />
   }, {
     path: '/auth',
     element: <ProtectedRoute authorizedRoles={['VISITOR']} />,
@@ -34,8 +33,38 @@ export default createBrowserRouter([
         element: <Layout />,
         children: [
           {
-            path: '/services/medication',
+            path: '/services/medications',
             element: <MedicationPage />,
+          }
+        ]
+      }
+    ]
+  }, {
+    path: '/report',
+    element: <ProtectedRoute authorizedRoles={['ADMIN']} />,
+    children: [
+      {
+        path: '/report',
+        element: <Layout />,
+        children: [
+          {
+            path: '/report/inventory',
+            element: <InventoryDashboard />
+          }
+        ]
+      }
+    ]
+  }, {
+    path: '/visit',
+    element: <ProtectedRoute authorizedRoles={['CLIENT', 'ADMIN']} />,
+    children: [
+      {
+        path: '/visit',
+        element: <Layout />,
+        children: [
+          {
+            path: '/visit/request',
+            element: <VisitRequestPage />
           }
         ]
       }
