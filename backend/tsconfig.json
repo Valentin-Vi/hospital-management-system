@@ -15,7 +15,7 @@
       "@/dals/types": ["./dals/types"],
       "@/dals/schemas": ["./dals/schemas"],
       "@/errors": ["./errors"],
-      "@/models": ["./models"],
+      "@/models/*": ["./models/*"],
       "@/models/schemas": ["./models/schemas.ts"],
       "@/repositories": ["./repositories"],
       "@/routers": ["./routers"],
