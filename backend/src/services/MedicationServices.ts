@@ -1,34 +1,50 @@
-import { MedicationDal } from "@dals";
-import { Medication } from "@models";
+import { PrismaClient } from "@prisma/client";
+import { MedicationRepository, MedicationQueryRepository } from "@/repositories";
+import { Medication } from "@/models";
 
 class MedicationService {
-  constructor(
-    private readonly medicationDal: MedicationDal = new MedicationDal()
-  ) {}
+  private medicationRepo: MedicationRepository;
+  private medicationQueryRepo: MedicationQueryRepository;
+
+  constructor() {
+    const prisma = new PrismaClient();
+    this.medicationRepo = new MedicationRepository(prisma);
+    this.medicationQueryRepo = new MedicationQueryRepository(prisma);
+  }
 
   public async getPaginatedMedications(page: number, limit: number) {
-    return await this.medicationDal.getPaginatedMedications(page, limit);
+    return await this.medicationQueryRepo.findPaginated(page, limit);
   }
 
   public async getFilteredPaginatedMedications(page: number, limit: number, filter: { column: string, value: string }) {
-    return await this.medicationDal.getFilteredPaginatedMedications(page, limit, filter);
+    return await this.medicationQueryRepo.findFilteredPaginated(page, limit, filter);
   }
+
   public async deleteRow(rowId: number): Promise<boolean> {
-    return await this.medicationDal.deleteRow(rowId);
+    try {
+      await this.medicationRepo.delete(rowId);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   public async deleteMany(rowIds: number[]): Promise<boolean> {
-    return await this.medicationDal.deleteMany(rowIds);
+    try {
+      await this.medicationRepo.deleteMany(rowIds);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   public async getEntireMedicationsInventory() {
-    return await this.medicationDal.getEntireMedicationsInventory();
+    return await this.medicationQueryRepo.findAllWithBatches();
   }
 
   public async insertRow(medication: Medication) {
-    return await this.medicationDal.insertMedication(medication);
+    return await this.medicationRepo.create(medication);
   }
-
 }
 
 export default MedicationService;

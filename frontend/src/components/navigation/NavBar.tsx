@@ -17,6 +17,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { useAuth } from '@/security';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/shadcn-io/dropdown-menu';
 import { User } from 'lucide-react';
+import type { TUserRole } from '@/models/user';
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -79,6 +80,7 @@ export interface Navbar01NavLink {
   href: string;
   label: string;
   active?: boolean;
+  role?: TUserRole[]
 }
 
 export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
@@ -94,10 +96,9 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
 
 // Default navigation links
 const defaultNavigationLinks: Navbar01NavLink[] = [
-  { href: '/services/medications', label: 'Medications', active: true },
-  { href: '/report/medical', label: 'Medication Stock Report' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#about', label: 'About' },
+  { href: '/services/medications', label: 'Medications', active: true, role: ['DOCTOR', 'ADMIN'] },
+  { href: '/report/inventory', label: 'Inventory Dashboard', role: ['DOCTOR', 'ADMIN'] },
+  { href: '/visit/request', label: 'Visit Request', role: ['CLIENT', 'ADMIN'] },
 ];
 
 export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
@@ -184,20 +185,21 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 <PopoverContent align="start" className="w-48 p-2">
                 <NavigationMenu className="max-w-none">
                   <NavigationMenuList className="flex-col items-start gap-1">
-                    {navigationLinks.map((link, index) => (
-                      <NavigationMenuItem key={index} className="w-full">
-                        <button
-                          onClick={(e) => e.preventDefault()}
-                          className={cn(
-                            "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
-                            link.active 
-                              ? "bg-accent text-accent-foreground" 
-                              : "text-foreground/80"
-                          )}
-                        >
-                          {link.label}
-                        </button>
-                      </NavigationMenuItem>
+                    {navigationLinks.map((link, index) => 
+                      link.role?.includes(user?.type as TUserRole) && (
+                        <NavigationMenuItem key={index} className="w-full">
+                          <button
+                            onClick={(e) => e.preventDefault()}
+                            className={cn(
+                              "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
+                              link.active 
+                                ? "bg-accent text-accent-foreground" 
+                                : "text-foreground/80"
+                            )}
+                          >
+                            {link.label}
+                          </button>
+                        </NavigationMenuItem>
                     ))}
                   </NavigationMenuList>
                 </NavigationMenu>
@@ -210,23 +212,24 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
               {!isMobile && (
                 <NavigationMenu className="flex">
                 <NavigationMenuList className="gap-1">
-                  {navigationLinks.map((link, index) => (
-                    <NavigationMenuItem key={index}>
-                      <NavigationMenuLink>
-                      <button
-                        onClick={(e) => nav(link.href)}
-                        disabled={loc.pathname === link.href}
-                        className={cn(
-                          "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
-                          link.active 
-                            ? "bg-accent text-accent-foreground" 
-                            : "text-foreground/80 hover:text-foreground"
-                        )}
-                      >
-                        {link.label}
-                      </button>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                  {navigationLinks.map((link, index) => 
+                    link.role?.includes(user?.type as TUserRole) && (
+                      <NavigationMenuItem key={index}>
+                        <NavigationMenuLink>
+                        <button
+                          onClick={(e) => nav(link.href)}
+                          disabled={loc.pathname === link.href}
+                          className={cn(
+                            "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
+                            link.active 
+                              ? "bg-accent text-accent-foreground" 
+                              : "text-foreground/80 hover:text-foreground"
+                          )}
+                        >
+                          {link.label}
+                        </button>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
                   ))}
                 </NavigationMenuList>
                 </NavigationMenu>

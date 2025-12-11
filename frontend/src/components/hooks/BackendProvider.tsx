@@ -32,7 +32,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   }
 
   async function getPaginatedUsers(page: number, limit: number): Promise<TUserSchema[]> {
-    if(page < 0 || limit < 1) throw new Error('Inalid query params');
+    if (page < 0 || limit < 1) throw new Error('Inalid query params');
     return await getData(
       await fetch(`http://localhost:3010/admin/users/get-paginated?page=${page}&limit=${limit}`, {
         method: 'GET',
@@ -46,7 +46,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   }
 
   const getPaginatedMedications = async (page: number, limit: number): Promise<TMedicationSchema[]> => {
-    if(page < 0 || limit < 1) throw new Error('Inalid query params');
+    if (page < 0 || limit < 1) throw new Error('Inalid query params');
     return await getData(
       await fetch(`http://localhost:3010/medication/get-paginated?page=${page}&limit=${limit}`, {
         method: 'GET',
@@ -60,7 +60,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   }
 
   const getFilteredPaginatedMedications = async (page: number, limit: number, filter: { column: string, value: string }): Promise<TMedicationSchema[]> => {
-    if( page < 0 || limit < 1) throw new Error('Inalid query params');
+    if (page < 0 || limit < 1) throw new Error('Inalid query params');
     filter.column = filter.column.replace(' ', '_');
     return await getData(
       await fetch(`http://localhost:3010/medication/get-filtered-paginated?page=${page}&limit=${limit}&column=${filter.column}&value=${filter.value}`, {
@@ -84,7 +84,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
     }
 
     const result = medicationWithInventorySchema.safeParse(payload);
-    if(!result.success) return false;
+    if (!result.success) return false;
     return (await fetch('http://localhost:3010/medication/insert', {
       method: 'POST',
       credentials: 'include',
@@ -96,7 +96,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   }
 
   const deleteMedicationRow = async (rowId: number): Promise<boolean> => {
-    if(!rowId) return false;
+    if (!rowId) return false;
     return (await fetch(`http://localhost:3010/medication/delete?rowId=${rowId}`, {
       method: 'DELETE',
       credentials: 'include'
@@ -104,7 +104,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   }
 
   const getPaginatedInventory = async (page: number, limit: number) => {
-    if(page < 0 || limit < 1) throw new Error('Inalid query params');
+    if (page < 0 || limit < 1) throw new Error('Inalid query params');
     return await getData(
       await fetch(`http://localhost:3010/inventory/get-paginated?page=${page}&limit=${limit}`, {
         method: 'GET',
@@ -118,7 +118,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   }
 
   const deleteMedications = async (rowIds: number[]) => {
-    if(rowIds.length === 0) return false;
+    if (rowIds.length === 0) return false;
     return (await fetch(`http://localhost:3010/medication/delete-many?rowIds=${rowIds.join(',')}`, {
       method: 'DELETE',
       credentials: 'include'
@@ -152,14 +152,14 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
       getEntireMedicationsInventory,
       insertMedicationRow
     }}>
-    { children }
+      {children}
     </BackendContext.Provider>
   )
 }
 
 export default function useBackend() {
   const context = useContext(BackendContext);
-  if(context === undefined) {
+  if (context === undefined) {
     throw new Error('\"useBackend\" hook must be used within an \"BackendProvider\" component.')
   }
   return context
