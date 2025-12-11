@@ -143,51 +143,58 @@ const MEDICATION_DATA: MedicationWithBatch[] = [
   { name: "Acetaminophen 120mg/5ml", category: "Analgesic", brand_name: "Panadol Children", generic_name: "Paracetamol", strength: "120 mg/5 ml", form: "Syrup", minimum_quantity: 30, batch: { quantity: 100, expiration_date: new Date("2026-01-14") } },
 ];
 
-export const VISIT_DATA = [
+// Visit data structure (indices will be mapped to actual IDs)
+interface VisitDataStructure {
+  visit_date: Date;
+  clientIndex: number; // Index in CLIENT_DATA array (0-based)
+  doctorIndex: number; // Index in DOCTOR_DATA array (0-based)
+}
+
+const VISIT_DATA_STRUCTURE: VisitDataStructure[] = [
   {
     visit_date: new Date("2025-01-05T10:00:00"),
-    clientId: 1,
-    doctorId: 1,
+    clientIndex: 0, // First client
+    doctorIndex: 0, // First doctor
   },
   {
     visit_date: new Date("2025-01-10T14:30:00"),
-    clientId: 1,
-    doctorId: 2,
+    clientIndex: 0, // First client
+    doctorIndex: 1, // Second doctor
   },
   {
     visit_date: new Date("2025-02-02T09:15:00"),
-    clientId: 2,
-    doctorId: 1,
+    clientIndex: 1, // Second client
+    doctorIndex: 0, // First doctor
   },
   {
     visit_date: new Date("2025-02-12T16:00:00"),
-    clientId: 2,
-    doctorId: 4,
+    clientIndex: 1, // Second client
+    doctorIndex: 3, // Fourth doctor
   },
   {
     visit_date: new Date("2025-03-01T11:45:00"),
-    clientId: 3,
-    doctorId: 3,
+    clientIndex: 2, // Third client
+    doctorIndex: 2, // Third doctor
   },
   {
     visit_date: new Date("2025-03-22T08:30:00"),
-    clientId: 3,
-    doctorId: 2,
+    clientIndex: 2, // Third client
+    doctorIndex: 1, // Second doctor
   },
   {
     visit_date: new Date("2025-04-10T15:00:00"),
-    clientId: 1,
-    doctorId: 4,
+    clientIndex: 0, // First client
+    doctorIndex: 3, // Fourth doctor
   },
   {
     visit_date: new Date("2025-04-18T12:10:00"),
-    clientId: 2,
-    doctorId: 3,
+    clientIndex: 1, // Second client
+    doctorIndex: 2, // Third doctor
   },
   {
     visit_date: new Date("2025-05-03T13:20:00"),
-    clientId: 3,
-    doctorId: 1,
+    clientIndex: 2, // Third client
+    doctorIndex: 0, // First doctor
   }
 ];
 
@@ -207,7 +214,7 @@ async function main() {
   });
 
   // Create CLIENT users
-  const clientUsers = [];
+  const clientUsers: Array<{ userId: number; email: string; [key: string]: any }> = [];
   for (const c of CLIENT_DATA) {
     const user = await prisma.user.upsert({
       where: { email: c.email },
@@ -227,7 +234,7 @@ async function main() {
   }
 
   // Create DOCTOR users
-  const doctorUsers = [];
+  const doctorUsers: Array<{ user: { userId: number; email: string; [key: string]: any }; specialty: string }> = [];
   for (const d of DOCTOR_DATA) {
     const { specialty, ...userData } = d;
     const user = await prisma.user.upsert({
@@ -277,24 +284,67 @@ async function main() {
   for (const medData of MEDICATION_DATA) {
     const { batch, ...medicationData } = medData;
     
-    // Create medication
-    const medication = await prisma.medication.create({
-      data: medicationData
-    });
+    try {
+      // Check if medication already exists
+      const existingMedication = await prisma.medication.findFirst({
+        where: { name: medicationData.name }
+      });
 
-    // Create batch for medication
-    await prisma.batch.create({
-      data: {
-        medicationId: medication.medicationId,
-        quantity: batch.quantity,
-        expiration_date: batch.expiration_date,
+      let medication;
+      if (existingMedication) {
+        // Update existing medication
+        medication = await prisma.medication.update({
+          where: { medicationId: existingMedication.medicationId },
+          data: medicationData
+        });
+      } else {
+        // Create new medication
+        medication = await prisma.medication.create({
+          data: medicationData
+        });
       }
-    });
+
+      // Create batch for medication (skip if already exists for this medication)
+      const existingBatch = await prisma.batch.findFirst({
+        where: {
+          medicationId: medication.medicationId,
+          expiration_date: batch.expiration_date
+        }
+      });
+
+      if (!existingBatch) {
+        await prisma.batch.create({
+          data: {
+            medicationId: medication.medicationId,
+            quantity: batch.quantity,
+            expiration_date: batch.expiration_date,
+          }
+        });
+      }
+    } catch (error) {
+      console.error(`Error seeding medication ${medicationData.name}:`, error);
+      // Continue with next medication
+    }
   }
 
-  // Create VISITS
+  // Create VISITS using actual client and doctor IDs
+  const visitsToCreate = VISIT_DATA_STRUCTURE.map(visitData => {
+    const client = clientUsers[visitData.clientIndex];
+    const doctor = doctorUsers[visitData.doctorIndex];
+    
+    if (!client || !doctor) {
+      throw new Error(`Invalid visit data: clientIndex ${visitData.clientIndex} or doctorIndex ${visitData.doctorIndex} out of range`);
+    }
+    
+    return {
+      visit_date: visitData.visit_date,
+      clientId: client.userId,
+      doctorId: doctor.user.userId,
+    };
+  });
+
   await prisma.visit.createMany({ 
-    data: VISIT_DATA,
+    data: visitsToCreate,
     skipDuplicates: true 
   });
 }
