@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Medication } from "@/models";
+import { Medication } from "@/models/medication";
 
 /**
  * Repository for Medication CRUD operations
@@ -34,6 +34,14 @@ export class MedicationRepository {
       where: { medicationId: id }
     });
     return result ? this._toDomain(result) : null;
+  }
+
+  /**
+   * Find all medications
+   */
+  async findAll(): Promise<Medication[]> {
+    const medications = await this.prisma.medication.findMany();
+    return medications.map(medication => this._toDomain(medication));
   }
 
   /**

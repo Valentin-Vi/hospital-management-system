@@ -38,6 +38,6 @@
     "typescript": "^5.6.2"
   },
   "prisma": {
-    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
+    "seed": "ts-node -r tsconfig-paths/register --project tsconfig.seed.json prisma/seed.ts"
   }
 }

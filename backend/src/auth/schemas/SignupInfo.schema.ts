@@ -1,5 +1,5 @@
 import z from "zod";
-import { UserSchema } from "@models/schemas";
+import { UserSchema } from "@/models/schemas";
 
 export const SignupInfoSchema = UserSchema.omit({
   userId: true,
