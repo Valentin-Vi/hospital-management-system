@@ -1,121 +1,101 @@
 import { PrismaClient } from "@prisma/client";
 import { User } from "@/models";
-import { TUserSchema, UserSchema } from "@/models/schemas";
-import type { TIncludeArgs } from "@/dals/schemas";
-import type { TFindParams } from "@/dals/types";
-import type { Result } from "@/utils/types";
-import type { TStoreUserSchema } from "@/dals/schemas";
+import { UserSchema } from "@/models/schemas";
 
 /**
- * Repository for User entity CRUD operations
+ * Repository for User operations
  */
 export class UserRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   /**
-   * Create a new user
-   */
-  async create(user: TStoreUserSchema): Promise<Result<User>> {
-    try {
-      const prismaUser = await this.prisma.user.create({
-        data: user
-      });
-      return {
-        success: true,
-        data: new User(UserSchema.parse(prismaUser))
-      };
-    } catch (err) {
-      console.error(err);
-      if (err instanceof Error) {
-        return {
-          success: false,
-          error: err.message
-        };
-      } else {
-        return {
-          success: false,
-          error: 'Unknown error occurred'
-        };
-      }
-    }
-  }
-
-  /**
-   * Find user by various criteria
-   */
-  async find({ col, value, include }: TFindParams): Promise<User | null> {
-    switch (col) {
-      case 'userId':
-        return this.findById(value as number, include);
-      case 'email':
-        return this.findByEmail(value as string, include);
-      default:
-        throw new Error(`Unrecognized col value: ${col}`);
-    }
-  }
-
-  /**
    * Find user by ID
    */
-  async findById(userId: number, include?: TIncludeArgs): Promise<User | null> {
-    const prismaUser = await this.prisma.user.findUnique({
-      where: { userId },
-      include: include
+  async findById(id: number): Promise<User | null> {
+    const result = await this.prisma.user.findUnique({
+      where: { userId: id }
     });
-    if (prismaUser === null) return null;
-    const parseResult = UserSchema.parse(prismaUser);
-    return new User(parseResult);
+    return result ? this._toDomain(result) : null;
   }
 
   /**
    * Find user by email
    */
-  async findByEmail(email: string, include?: TIncludeArgs): Promise<User | null> {
-    const prismaUser = await this.prisma.user.findUnique({
-      where: { email },
-      include: include
+  async findByEmail(email: string): Promise<User | null> {
+    const result = await this.prisma.user.findUnique({
+      where: { email }
     });
-    if (prismaUser === null) return null;
-    return new User(prismaUser);
+    return result ? this._toDomain(result) : null;
   }
 
   /**
-   * Get paginated users
+   * Find users with pagination
    */
   async findPaginated(page: number, limit: number): Promise<User[]> {
-    const prismaUsers = await this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       skip: page * limit,
       take: limit,
       orderBy: { userId: 'desc' }
     });
-    return this._buildMany(prismaUsers);
+    return users.map(user => this._toDomain(user));
+  }
+
+  /**
+   * Create a new user
+   */
+  async create(userData: {
+    email: string;
+    password: string;
+    firstname: string;
+    lastname: string;
+    type?: string;
+    enabled?: boolean;
+  }): Promise<User> {
+    const prismaUser = await this.prisma.user.create({
+      data: {
+        email: userData.email,
+        password: userData.password,
+        firstname: userData.firstname,
+        lastname: userData.lastname,
+        type: userData.type as any || 'VISITOR',
+        enabled: userData.enabled ?? false
+      }
+    });
+    return this._toDomain(prismaUser);
   }
 
   /**
    * Update user
    */
-  async update(userId: number, data: Partial<TUserSchema>): Promise<User> {
+  async update(id: number, data: Partial<User>): Promise<User> {
     const prismaUser = await this.prisma.user.update({
-      where: { userId },
-      data
+      where: { userId: id },
+      data: {
+        email: data.email,
+        password: data.password,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        enabled: data.enabled,
+        type: data.type as any,
+      }
     });
-    return new User(UserSchema.parse(prismaUser));
+    return this._toDomain(prismaUser);
   }
 
   /**
-   * Delete user by ID
+   * Delete user
    */
-  async delete(userId: number): Promise<void> {
+  async delete(id: number): Promise<void> {
     await this.prisma.user.delete({
-      where: { userId }
+      where: { userId: id }
     });
   }
 
   /**
-   * Convert Prisma users to domain entities
+   * Convert Prisma model to domain entity
    */
-  private _buildMany(prismaUsers: TUserSchema[]): User[] {
-    return prismaUsers.map(user => new User(user));
+  private _toDomain(prisma: any): User {
+    return new User(UserSchema.parse(prisma));
   }
 }
 

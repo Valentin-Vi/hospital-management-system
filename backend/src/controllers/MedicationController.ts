@@ -1,5 +1,5 @@
-import { MedicationSchema } from "@/models/schemas";
-import { MedicationService } from "@/services";
+import { MedicationSchema } from "@models/schemas";
+import { MedicationService } from "@services";
 import { Request, Response } from "express";
 
 class MedicationController {

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { MedicationController } from "@/controllers";
+import { MedicationController } from "@controllers";
 
 const router = Router()
 const controller = new MedicationController();

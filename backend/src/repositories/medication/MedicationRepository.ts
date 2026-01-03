@@ -2,8 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { Medication } from "@/models";
 
 /**
- * Repository for Medication entity CRUD operations
- * Handles basic create, read, update, delete operations
+ * Repository for Medication CRUD operations
+ * Handles create, update, delete operations
  */
 export class MedicationRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -37,36 +37,26 @@ export class MedicationRepository {
   }
 
   /**
-   * Find all medications
-   */
-  async findAll(): Promise<Medication[]> {
-    const results = await this.prisma.medication.findMany({
-      orderBy: { medicationId: 'desc' }
-    });
-    return results.map(r => this._toDomain(r));
-  }
-
-  /**
    * Update medication
    */
   async update(id: number, data: Partial<Medication>): Promise<Medication> {
     const prismaMedication = await this.prisma.medication.update({
       where: { medicationId: id },
       data: {
-        ...(data.name && { name: data.name }),
-        ...(data.category && { category: data.category }),
-        ...(data.brandName && { brand_name: data.brandName }),
-        ...(data.genericName && { generic_name: data.genericName }),
-        ...(data.strength && { strength: data.strength }),
-        ...(data.form && { form: data.form }),
-        ...(data.minimum_quantity !== undefined && { minimum_quantity: data.minimum_quantity }),
+        name: data.name,
+        category: data.category,
+        brand_name: data.brandName,
+        generic_name: data.genericName,
+        strength: data.strength,
+        form: data.form,
+        minimum_quantity: data.minimum_quantity,
       }
     });
     return this._toDomain(prismaMedication);
   }
 
   /**
-   * Delete medication by ID
+   * Delete a medication by ID
    */
   async delete(id: number): Promise<void> {
     await this.prisma.medication.delete({
@@ -75,11 +65,15 @@ export class MedicationRepository {
   }
 
   /**
-   * Delete multiple medications
+   * Delete multiple medications by IDs
    */
   async deleteMany(ids: number[]): Promise<void> {
     await this.prisma.medication.deleteMany({
-      where: { medicationId: { in: ids } }
+      where: {
+        medicationId: {
+          in: ids
+        }
+      }
     });
   }
 
@@ -95,7 +89,7 @@ export class MedicationRepository {
       prisma.generic_name,
       prisma.strength,
       prisma.form,
-      prisma.minimum_quantity ?? 0
+      prisma.minimum_quantity
     );
   }
 }

@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { Batch } from "@/models";
+import { Batch, Medication } from "@/models";
 
 /**
- * Repository for Batch entity CRUD operations
+ * Repository for Batch operations
  */
 export class BatchRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -39,37 +39,32 @@ export class BatchRepository {
    * Find all batches for a medication
    */
   async findByMedicationId(medicationId: number): Promise<Batch[]> {
-    const results = await this.prisma.batch.findMany({
+    const batches = await this.prisma.batch.findMany({
       where: { medicationId },
       include: { medication: true },
       orderBy: { expiration_date: 'asc' }
     });
-    return results.map(r => this._toDomain(r));
-  }
-
-  /**
-   * Find all batches
-   */
-  async findAll(): Promise<Batch[]> {
-    const results = await this.prisma.batch.findMany({
-      include: { medication: true },
-      orderBy: { expiration_date: 'asc' }
-    });
-    return results.map(r => this._toDomain(r));
+    return batches.map(batch => this._toDomain(batch));
   }
 
   /**
    * Find expired batches
    */
   async findExpired(): Promise<Batch[]> {
-    const results = await this.prisma.batch.findMany({
+    const batches = await this.prisma.batch.findMany({
       where: {
-        expiration_date: { lt: new Date() },
-        quantity: { gt: 0 }
+        expiration_date: {
+          lt: new Date()
+        },
+        quantity: {
+          gt: 0
+        }
       },
-      include: { medication: true }
+      include: {
+        medication: true
+      }
     });
-    return results.map(r => this._toDomain(r));
+    return batches.map(batch => this._toDomain(batch));
   }
 
   /**
@@ -79,34 +74,31 @@ export class BatchRepository {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + days);
 
-    const results = await this.prisma.batch.findMany({
+    const batches = await this.prisma.batch.findMany({
       where: {
         expiration_date: {
           gte: new Date(),
           lte: futureDate
         },
-        quantity: { gt: 0 }
+        quantity: {
+          gt: 0
+        }
       },
-      include: { medication: true }
+      include: {
+        medication: true
+      }
     });
-    return results.map(r => this._toDomain(r));
+    return batches.map(batch => this._toDomain(batch));
   }
 
   /**
-   * Find batches expiring between dates
+   * Find all batches
    */
-  async findExpiringBetween(start: Date, end: Date): Promise<Batch[]> {
-    const results = await this.prisma.batch.findMany({
-      where: {
-        expiration_date: {
-          gte: start,
-          lte: end
-        },
-        quantity: { gt: 0 }
-      },
+  async findAll(): Promise<Batch[]> {
+    const batches = await this.prisma.batch.findMany({
       include: { medication: true }
     });
-    return results.map(r => this._toDomain(r));
+    return batches.map(batch => this._toDomain(batch));
   }
 
   /**
@@ -116,9 +108,9 @@ export class BatchRepository {
     const prismaBatch = await this.prisma.batch.update({
       where: { batchId: id },
       data: {
-        ...(data.medicationId !== undefined && { medicationId: data.medicationId }),
-        ...(data.quantity !== undefined && { quantity: data.quantity }),
-        ...(data.expirationDate && { expiration_date: data.expirationDate }),
+        medicationId: data.medicationId,
+        quantity: data.quantity,
+        expiration_date: data.expirationDate,
       },
       include: { medication: true }
     });
@@ -126,7 +118,7 @@ export class BatchRepository {
   }
 
   /**
-   * Delete batch by ID
+   * Delete batch
    */
   async delete(id: number): Promise<void> {
     await this.prisma.batch.delete({
@@ -138,8 +130,6 @@ export class BatchRepository {
    * Convert Prisma model to domain entity
    */
   private _toDomain(prisma: any): Batch {
-    // Import Medication dynamically to avoid circular dependency
-    const { Medication } = require("@/models");
     const medication = prisma.medication ? new Medication(
       prisma.medication.medicationId,
       prisma.medication.name,
@@ -148,14 +138,14 @@ export class BatchRepository {
       prisma.medication.generic_name,
       prisma.medication.strength,
       prisma.medication.form,
-      prisma.medication.minimum_quantity ?? 0
+      prisma.medication.minimum_quantity
     ) : undefined;
 
     return new Batch(
       prisma.batchId,
       prisma.medicationId,
       prisma.quantity,
-      new Date(prisma.expiration_date),
+      prisma.expiration_date,
       medication
     );
   }
