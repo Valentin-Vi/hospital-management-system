@@ -1,5 +1,5 @@
 import { Router } from "express";
-import AnalyticsController from "../controllers/AnalyticsController";
+import { AnalyticsController } from "@/controllers";
 
 const router = Router();
 const controller = new AnalyticsController();

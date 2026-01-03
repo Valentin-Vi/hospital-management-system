@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { Visit } from "@/models";
-import Client from "@/models/client";
-import Doctor from "@/models/doctor";
+import { Visit } from "@/models/visit";
+import { Client } from "@/models/client";
+import { Doctor } from "@/models/doctor";
 import { UserSchema } from "@/models/schemas";
 
 /**
@@ -256,7 +256,7 @@ export class VisitRepository {
       enabled: doctorUser.enabled,
       type: doctorUser.type
     });
-    const doctor = new Doctor(doctorUserData, prisma.doctors.specialty, []);
+    const doctor = new Doctor(doctorUserData, prisma.doctors.doctorId, prisma.doctors.specialty, []);
     doctor.doctorId = prisma.doctors.doctorId;
 
     return new Visit(

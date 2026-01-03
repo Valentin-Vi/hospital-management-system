@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { Medication } from "@/models";
-import { Batch } from "@/models";
+import { Medication } from "@/models/medication";
+import { Batch } from "@/models/batch";
 
 /**
  * Repository for complex Medication read queries

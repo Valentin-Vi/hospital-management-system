@@ -1,86 +1,102 @@
-import { User } from "@/models";
 import { PrismaClient } from "@prisma/client";
+import { User } from "@/models/user";
 import { UserRepository } from "@/repositories";
 import { compare } from "bcrypt";
 import type { Result } from "@/utils/types";
 import type { TRefreshToken, TSignupInfo } from "@/auth/schemas";
 
 class AuthService {
-  private readonly userRepo: UserRepository;
+  private readonly prisma: PrismaClient;
+  private readonly userRepository: UserRepository;
 
   constructor() {
-    const prisma = new PrismaClient();
-    this.userRepo = new UserRepository(prisma);
-    return this;
+    this.prisma = new PrismaClient();
+    this.userRepository = new UserRepository(this.prisma);
   }
 
   async signup(user: TSignupInfo): Promise<Result<User>> {
-    const result = await this.userRepo.create(user);
-    if (!result.success) {
-      // Check if it's a unique constraint violation (email already exists)
-      if (result.error?.includes('Unique constraint') || result.error?.includes('P2002')) {
+    try {
+      // Check if email already exists
+      const existingUser = await this.userRepository.findByEmail(user.email);
+      if (existingUser) {
         return {
           success: false,
           error: 'Email is not unique.'
         };
       }
-      return result;
+
+      const createdUser = await this.userRepository.create({
+        email: user.email,
+        password: user.password,
+        firstname: user.firstname,
+        lastname: user.lastname,
+      });
+
+      return {
+        success: true,
+        data: createdUser
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to create user.'
+      };
     }
-    return result;
   }
 
   async login({ email, password }: { email: string, password: string }): Promise<Result<User>> {
-    const user = await this.userRepo.findByEmail(email);
-    if(user === null) {
+    const user = await this.userRepository.findByEmail(email);
+    
+    if (user === null) {
       return {
         success: false,
         error: 'Email not found.'
-      }
+      };
     }
 
-    if(!await compare(password, user.password)) {
+    if (!await compare(password, user.password)) {
       return {
         success: false,
-        error: `Incorrect password.`
-      }
-    };
+        error: 'Incorrect password.'
+      };
+    }
 
     return {
       success: true,
       data: user
-    }
+    };
   }
 
   async refresh(refreshToken: TRefreshToken): Promise<Result<User>> {
     const { userId, email, password } = refreshToken;
-    const user = await this.userRepo.findByEmail(email);
-    if(user === null) {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (user === null) {
       return {
         success: false,
         error: 'Email not found.'
-      }
+      };
     }
 
-    if(password !== user.password) {
+    if (password !== user.password) {
       return {
         success: false,
         error: 'Incorrect password.'
-      }
+      };
     }
 
-    if(userId !== user.userId) {
+    if (userId !== user.userId) {
       return {
         success: false,
         error: 'Incorrect userId'
-      }
+      };
     }
 
     return {
       success: true,
       data: user
-    }
+    };
   }
-};
-
+}
 
 export default AuthService;
