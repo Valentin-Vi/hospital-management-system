@@ -1,11 +1,10 @@
-import { AuthService } from "@auth";
-import { SignupInfoSchema } from "@auth/schemas";
-import { LoginInfoSchema } from "@auth/schemas";
-import type { Result } from "@utils/types";
-import { RefreshTokenSchema, type TRefreshToken } from "@auth/schemas";
-import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { Request, Response } from "express";
-import { hashPassword } from "@utils";
+import jwt from "jsonwebtoken";
+
+import { AuthService } from "@/auth";
+import { SignupInfoSchema, LoginInfoSchema, RefreshTokenSchema, type TRefreshToken } from "@/auth/schemas";
+import type { Result } from "@/utils/types";
+import { hashPassword } from "@/utils";
 
 class AuthController {
   
@@ -240,12 +239,12 @@ class AuthController {
       };
       
     } catch(err) {
-      if(err instanceof TokenExpiredError) {
+      if(err instanceof jwt.TokenExpiredError) {
         return {
           success: false,
           error: 'TokenExpiredError: jwt expired'
         }
-      } else if (err instanceof JsonWebTokenError) {
+      } else if (err instanceof jwt.JsonWebTokenError) {
         return {
           success: false,
           error: "JsonWebTokenError: invalid signature"

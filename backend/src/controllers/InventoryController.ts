@@ -1,4 +1,4 @@
-import InventoryService from "services/InventoryService";
+import { InventoryService } from "@/services";
 import { Request, Response } from "express";
 
 export default class InventoryController {

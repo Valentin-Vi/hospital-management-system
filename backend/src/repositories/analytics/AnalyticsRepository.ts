@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { MedicationRepository } from "../medication/MedicationRepository";
 import { BatchRepository } from "../batch/BatchRepository";
-import { Medication, Batch } from "@/models";
+import { Medication } from "@/models/medication";
+import { Batch } from "@/models/batch";
 
 /**
  * Repository for cross-cutting analytics queries

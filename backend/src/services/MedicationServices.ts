@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { MedicationRepository, MedicationQueryRepository } from "@/repositories";
-import { Medication } from "@/models";
+import { Medication } from "@/models/medication";
 
 class MedicationService {
   private medicationRepo: MedicationRepository;
