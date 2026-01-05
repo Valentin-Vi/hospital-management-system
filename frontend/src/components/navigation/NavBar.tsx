@@ -189,7 +189,8 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                       link.role?.includes(user?.type as TUserRole) && (
                         <NavigationMenuItem key={index} className="w-full">
                           <button
-                            onClick={(e) => e.preventDefault()}
+                            onClick={() => nav(link.href)}
+                            disabled={loc.pathname === link.href}
                             className={cn(
                               "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
                               link.active 
@@ -217,7 +218,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                       <NavigationMenuItem key={index}>
                         <NavigationMenuLink>
                         <button
-                          onClick={(e) => nav(link.href)}
+                          onClick={() => nav(link.href)}
                           disabled={loc.pathname === link.href}
                           className={cn(
                             "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
