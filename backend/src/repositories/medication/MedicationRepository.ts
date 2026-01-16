@@ -20,7 +20,6 @@ export class MedicationRepository {
         generic_name: medication.genericName,
         strength: medication.strength,
         form: medication.form,
-        minimum_quantity: medication.minimum_quantity,
       }
     });
     return this._toDomain(prismaMedication);
@@ -57,7 +56,6 @@ export class MedicationRepository {
         generic_name: data.genericName,
         strength: data.strength,
         form: data.form,
-        minimum_quantity: data.minimum_quantity,
       }
     });
     return this._toDomain(prismaMedication);

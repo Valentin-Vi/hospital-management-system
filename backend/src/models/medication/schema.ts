@@ -8,7 +8,8 @@ export const MedicationSchema = z.object({
   genericName: z.string().nonempty().max(200),
   strength: z.string().nonempty().max(200),
   form: z.string().nonempty().max(200),
-  minimum_quantity: z.number().int().min(0).default(0),
-})
+  expirationDate: z.iso.datetime(),
+}).strict()
+
 export type TMedicationSchema = z.infer<typeof MedicationSchema>
 

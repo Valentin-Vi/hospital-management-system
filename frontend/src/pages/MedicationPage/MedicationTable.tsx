@@ -43,11 +43,11 @@ const initInputRowData: TMedicationWithInventorySchema = {
 };
 
 export default function MedicationsTable() {
-  const [sorting, onSortingChange] = useState<SortingState>([{ id: 'medicationId', desc: false }]);
-  const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, onColumnVisibilityChange] = useState<VisibilityState>({});
-  const [pagination, onPaginationChange] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
-  const [rowSelection, onRowSelectionChange] = useState({});
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'medicationId', desc: false }]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+  const [rowSelection, setRowSelection] = useState({});
   
   // INPUT ROW STATE
   const [showInputRow, setShowInputRow] = useState<boolean>(false);
@@ -64,11 +64,11 @@ export default function MedicationsTable() {
   const table = useReactTable({
     ...tableProps,
     data: medications,
-    onSortingChange,
-    onColumnFiltersChange,
-    onColumnVisibilityChange,
-    onRowSelectionChange,
-    onPaginationChange,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
     state: { sorting, columnFilters, columnVisibility, pagination, rowSelection },
   })
 
@@ -90,7 +90,7 @@ export default function MedicationsTable() {
       if (completed) {
         queryClient.invalidateQueries({ queryKey: ['medications', 'get-all'] })
         setShowInputRow(false)
-        onPaginationChange(prev => ({ pageIndex: prev.pageIndex, pageSize: 10 }))
+        setPagination(prev => ({ pageIndex: prev.pageIndex, pageSize: 10 }))
         setInputRowData(initInputRowData)
       }
     }
@@ -103,12 +103,12 @@ export default function MedicationsTable() {
 
   const handleOpenInputRow = () => {
     setShowInputRow(true);
-    onPaginationChange(prev => ({ pageIndex: prev.pageIndex, pageSize: 9 }))
+    setPagination(prev => ({ pageIndex: prev.pageIndex, pageSize: 9 }))
   }
 
   const handleCloseInputRow = () => {
     setShowInputRow(false);
-    onPaginationChange(prev => ({ pageIndex: prev.pageIndex, pageSize: 10 }))
+    setPagination(prev => ({ pageIndex: prev.pageIndex, pageSize: 10 }))
   }
 
   const handleInsertRow = () => {
@@ -180,35 +180,36 @@ export default function MedicationsTable() {
           </TableHeader>
           <TableBody>
             {
-              showInputRow &&
-                <InputRow inputData={inputRowData} setInputData={setInputRowData} />
+              showInputRow && <InputRow inputData={inputRowData} setInputData={setInputRowData} />
             }
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+            {
+              table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+              )
+            }
           </TableBody>
         </Table>
         

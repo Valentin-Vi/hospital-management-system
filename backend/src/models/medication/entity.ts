@@ -6,7 +6,7 @@ class Medication {
   genericName: string = '';
   strength: string = '';
   form: string = '';
-  minimum_quantity: number = 0;
+  expirationDate: string = '';
 
   constructor(
     medicationId: number,
@@ -16,7 +16,7 @@ class Medication {
     genericName: string,
     strength: string,
     form: string,
-    minimum_quantity: number = 0
+    expirationDate: string,
   ) {
     this.medicationId = medicationId;
     this.name = name;
@@ -25,7 +25,7 @@ class Medication {
     this.genericName = genericName;
     this.strength = strength;
     this.form = form;
-    this.minimum_quantity = minimum_quantity;
+    this.expirationDate = expirationDate;
     return this;
   }
 }

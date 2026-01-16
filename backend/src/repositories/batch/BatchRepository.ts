@@ -2,15 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import { Batch } from "@/models/batch";
 import { Medication } from "@/models/medication";
 
-/**
- * Repository for Batch operations
- */
 export class BatchRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  /**
-   * Create a new batch
-   */
   async create(batch: Batch): Promise<Batch> {
     const prismaBatch = await this.prisma.batch.create({
       data: {
@@ -25,9 +19,6 @@ export class BatchRepository {
     return this._toDomain(prismaBatch);
   }
 
-  /**
-   * Find batch by ID
-   */
   async findById(id: number): Promise<Batch | null> {
     const result = await this.prisma.batch.findUnique({
       where: { batchId: id },
@@ -36,9 +27,6 @@ export class BatchRepository {
     return result ? this._toDomain(result) : null;
   }
 
-  /**
-   * Find all batches for a medication
-   */
   async findByMedicationId(medicationId: number): Promise<Batch[]> {
     const batches = await this.prisma.batch.findMany({
       where: { medicationId },
@@ -48,9 +36,6 @@ export class BatchRepository {
     return batches.map(batch => this._toDomain(batch));
   }
 
-  /**
-   * Find expired batches
-   */
   async findExpired(): Promise<Batch[]> {
     const batches = await this.prisma.batch.findMany({
       where: {
@@ -68,9 +53,6 @@ export class BatchRepository {
     return batches.map(batch => this._toDomain(batch));
   }
 
-  /**
-   * Find batches expiring soon
-   */
   async findExpiringSoon(days: number = 30): Promise<Batch[]> {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + days);
@@ -92,9 +74,6 @@ export class BatchRepository {
     return batches.map(batch => this._toDomain(batch));
   }
 
-  /**
-   * Find all batches
-   */
   async findAll(): Promise<Batch[]> {
     const batches = await this.prisma.batch.findMany({
       include: { medication: true }
@@ -102,9 +81,6 @@ export class BatchRepository {
     return batches.map(batch => this._toDomain(batch));
   }
 
-  /**
-   * Update batch
-   */
   async update(id: number, data: Partial<Batch>): Promise<Batch> {
     const prismaBatch = await this.prisma.batch.update({
       where: { batchId: id },
@@ -118,18 +94,12 @@ export class BatchRepository {
     return this._toDomain(prismaBatch);
   }
 
-  /**
-   * Delete batch
-   */
   async delete(id: number): Promise<void> {
     await this.prisma.batch.delete({
       where: { batchId: id }
     });
   }
 
-  /**
-   * Convert Prisma model to domain entity
-   */
   private _toDomain(prisma: any): Batch {
     const medication = prisma.medication ? new Medication(
       prisma.medication.medicationId,
@@ -151,4 +121,3 @@ export class BatchRepository {
     );
   }
 }
-

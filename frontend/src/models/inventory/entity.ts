@@ -1,12 +1,10 @@
-import type { InventoryShema } from './schema';
-
-export class Inventory implements InventoryShema {
+export class Inventory {
   inventoryId: number;
   productId: number;
   quantity: number;
   minimumQuantity: number;
 
-  constructor(data: InventoryShema) {
+  constructor(data: Inventory) {
     this.inventoryId = data.inventoryId;
     this.productId = data.productId;
     this.quantity = data.quantity;

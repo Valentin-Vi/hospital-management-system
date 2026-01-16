@@ -77,10 +77,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
   const insertMedicationRow = async (medication: TMedicationWithInventorySchema): Promise<boolean> => {
     const payload: TMedicationWithInventorySchema = {
       ...medication,
-      expirationDate:
-        medication.expirationDate instanceof Date
-          ? medication.expirationDate.toISOString()
-          : medication.expirationDate
+      expirationDate: medication.expirationDate
     }
 
     const result = medicationWithInventorySchema.safeParse(payload);

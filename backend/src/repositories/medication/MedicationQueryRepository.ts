@@ -2,16 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import { Medication } from "@/models/medication";
 import { Batch } from "@/models/batch";
 
-/**
- * Repository for complex Medication read queries
- * Handles pagination, filtering, and complex joins
- */
 export class MedicationQueryRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  /**
-   * Find medications with pagination
-   */
   async findPaginated(page: number, limit: number): Promise<Medication[]> {
     const prismaMedications = await this.prisma.medication.findMany({
       skip: page * limit,
@@ -21,9 +14,6 @@ export class MedicationQueryRepository {
     return prismaMedications.map(med => this._toDomain(med));
   }
 
-  /**
-   * Find medications with pagination and filtering
-   */
   async findFilteredPaginated(
     page: number,
     limit: number,
@@ -45,11 +35,9 @@ export class MedicationQueryRepository {
 
     const whereClause: any = {};
     
-    // Handle numeric columns
     if (filter.column === 'medicationId') {
       whereClause[filter.column] = parseInt(filter.value);
     } else {
-      // Handle string columns with case-insensitive search
       whereClause[filter.column] = {
         contains: filter.value,
         mode: 'insensitive'
@@ -66,9 +54,7 @@ export class MedicationQueryRepository {
     return prismaMedications.map(med => this._toDomain(med));
   }
 
-  /**
-   * Find all medications with their batches
-   */
+
   async findAllWithBatches(): Promise<Array<Medication & { batches: Batch[] }>> {
     const prismaMedications = await this.prisma.medication.findMany({
       include: {
@@ -92,17 +78,11 @@ export class MedicationQueryRepository {
     }));
   }
 
-  /**
-   * Find all medications
-   */
   async findAll(): Promise<Medication[]> {
     const prismaMedications = await this.prisma.medication.findMany();
     return prismaMedications.map(med => this._toDomain(med));
   }
 
-  /**
-   * Convert Prisma model to domain entity
-   */
   private _toDomain(prisma: any): Medication {
     return new Medication(
       prisma.medicationId,
