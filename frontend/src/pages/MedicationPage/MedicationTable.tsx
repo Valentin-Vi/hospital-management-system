@@ -180,7 +180,8 @@ export default function MedicationsTable() {
           </TableHeader>
           <TableBody>
             {
-              showInputRow && <InputRow inputData={inputRowData} setInputData={setInputRowData} />
+              showInputRow &&
+                <InputRow inputData={inputRowData} setInputData={setInputRowData} />
             }
             {
               table.getRowModel().rows?.length ? (
