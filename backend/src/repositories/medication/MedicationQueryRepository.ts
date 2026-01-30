@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Medication } from "@/models/medication";
 import { Batch } from "@/models/batch";
+import { LowStockMedication } from "@/repositories/analytics/types";
 
 export class MedicationQueryRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -12,6 +13,21 @@ export class MedicationQueryRepository {
       orderBy: { medicationId: 'desc' }
     });
     return prismaMedications.map(med => this._toDomain(med));
+  }
+
+  async findLowStock(): Promise<Array<LowStockMedication>> {
+    const result = await this.prisma.$queryRaw<[Medication & { total_stock: number }]>`
+      SELECT m.*, COALESCE(SUM(b.quantity), 0)::int as total_stock
+      FROM "medications" m
+      LEFT JOIN "batches" b ON b."medicationId" = m."medicationId"
+      GROUP BY m."medicationId"
+      HAVING COALESCE(SUM(b.quantity), 0) <= m.minimum_quantity
+    `
+    
+    return result.map(r => ({
+      medication: this._toDomain(r),
+      totalStock: r.total_stock
+    }))
   }
 
   async findFilteredPaginated(

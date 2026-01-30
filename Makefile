@@ -1,4 +1,4 @@
-dup:
+up:
 	sudo docker compose up $(ARGS)
 
 down:

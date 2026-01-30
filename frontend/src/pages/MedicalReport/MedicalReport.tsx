@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/shadcn
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/shadcn-io/table";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AlertTriangle, Archive, Calendar, Package } from "lucide-react";
+import { ToolTip as CustomToolTip } from "@/components/ui";
 
 export const InventoryDashboard = () => {
-  // INVENTORY_TYPE should be made a prop or come from context/router for future enhancements
-  const INVENTORY_TYPE = "medication"; // placeholder for extensibility
+  const INVENTORY_TYPE = "medication";
 
   const [data, setData] = useState<TAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,59 +22,59 @@ export const InventoryDashboard = () => {
   }, []);
 
   if (loading) {
-    return <div className="h-full overflow-y-auto p-8 text-center">Loading dashboard...</div>;
+    return <div className="h-full overflow-y-auto p-8 text-center">Cargando panel...</div>;
   }
 
   if (!data) {
-    return <div className="h-full overflow-y-auto p-8 text-center text-red-500">Failed to load dashboard data.</div>;
+    return <div className="h-full overflow-y-auto p-8 text-center text-red-500">Error al cargar los datos del panel.</div>;
   }
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   return (
     <div className="h-full overflow-y-auto p-8 space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">Inventory Dashboard ({INVENTORY_TYPE === "medication" ? "Medications" : "Equipment"})</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Panel de Inventario ({INVENTORY_TYPE === "medication" ? "Medicamentos" : "Equipamiento"})</h1>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Stock</CardTitle>
+            <CardTitle className="text-sm font-medium">Stock Total</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.kpis.totalStock}</div>
-            <p className="text-xs text-muted-foreground">Units across all medications</p>
+            <p className="text-xs text-muted-foreground">Unidades en todos los medicamentos</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
+            <CardTitle className="text-sm font-medium">Artículos con Stock Bajo</CardTitle>
             <AlertTriangle className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.kpis.lowStockCount}</div>
-            <p className="text-xs text-muted-foreground">Items below minimum quantity</p>
+            <p className="text-xs text-muted-foreground">Artículos por debajo de la cantidad mínima</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expired Batches</CardTitle>
+            <CardTitle className="text-sm font-medium">Lotes Expirados</CardTitle>
             <Archive className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.kpis.expiredCount}</div>
-            <p className="text-xs text-muted-foreground">Batches past expiration date</p>
+            <p className="text-xs text-muted-foreground">Lotes pasados de fecha de vencimiento</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+            <CardTitle className="text-sm font-medium">Por Vencer Pronto</CardTitle>
             <Calendar className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.kpis.expiringSoonCount}</div>
-            <p className="text-xs text-muted-foreground">Batches expiring in 30 days</p>
+            <p className="text-xs text-muted-foreground">Lotes que vencen en 30 días</p>
           </CardContent>
         </Card>
       </div>
@@ -83,7 +83,7 @@ export const InventoryDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Stock Distribution by Category</CardTitle>
+            <CardTitle>Distribución de Stock por Categoría</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={350}>
@@ -93,14 +93,14 @@ export const InventoryDashboard = () => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="count" fill="#8884d8" name="Quantity" />
+                <Bar dataKey="count" fill="#8884d8" name="Cantidad" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Category Share</CardTitle>
+            <CardTitle>Participación por Categoría</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
@@ -110,7 +110,7 @@ export const InventoryDashboard = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="count"
@@ -119,7 +119,7 @@ export const InventoryDashboard = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip content={CustomToolTip} isAnimationActive={true}/>
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -130,21 +130,21 @@ export const InventoryDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Low Stock Alerts</CardTitle>
+            <CardTitle>Alertas de Stock Bajo</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Medication</TableHead>
-                  <TableHead>Current</TableHead>
-                  <TableHead>Minimum</TableHead>
+                  <TableHead>Medicamento</TableHead>
+                  <TableHead>Actual</TableHead>
+                  <TableHead>Mínimo</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.lists.lowStockItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center">No low stock items</TableCell>
+                    <TableCell colSpan={3} className="text-center">No hay artículos con stock bajo</TableCell>
                   </TableRow>
                 ) : (
                   data.lists.lowStockItems.map((item, i) => (
@@ -161,22 +161,22 @@ export const InventoryDashboard = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Expired / Expiring Batches</CardTitle>
+            <CardTitle>Lotes Expirados / Por Vencer</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Medication</TableHead>
-                  <TableHead>Batch ID</TableHead>
-                  <TableHead>Expiry Date</TableHead>
-                  <TableHead>Qty</TableHead>
+                  <TableHead>Medicamento</TableHead>
+                  <TableHead>ID de Lote</TableHead>
+                  <TableHead>Fecha de Vencimiento</TableHead>
+                  <TableHead>Cant.</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {[...data.lists.expiredBatches, ...data.lists.expiringSoonBatches].length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center">No alerts</TableCell>
+                    <TableCell colSpan={4} className="text-center">Sin alertas</TableCell>
                   </TableRow>
                 ) : (
                   [...data.lists.expiredBatches, ...data.lists.expiringSoonBatches].map((batch, i) => (

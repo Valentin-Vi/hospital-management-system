@@ -1,5 +1,5 @@
 import { userSchema, type TUserSchema } from "@/models/user"
-import { medicationSchema, medicationWithInventorySchema, type TMedicationSchema, type TMedicationWithInventorySchema } from "@/models/medication"
+import { medicationSchema, medicationWithBatchSchema, type TMedicationSchema, type TMedicationWithBatchSchema } from "@/models/medication"
 import { createContext, useContext, type ReactNode } from "react"
 import { z, type ZodType } from "zod"
 
@@ -10,15 +10,15 @@ export type TBackendContext = {
   deleteMedicationRow: (rowId: number) => Promise<boolean>;
   getPaginatedInventory: (page: number, limit: number) => Promise<any[]>;
   deleteMedications: (rowIds: number[]) => Promise<boolean>;
-  getEntireMedicationsInventory: () => Promise<TMedicationWithInventorySchema[]>;
-  insertMedicationRow: (medication: TMedicationWithInventorySchema) => Promise<boolean>;
+  getEntireMedicationsInventory: () => Promise<TMedicationWithBatchSchema[]>;
+  insertMedicationRow: (medication: TMedicationWithBatchSchema) => Promise<boolean>;
 }
 
 const BackendContext = createContext<TBackendContext | undefined>(undefined)
 
 export function BackendProvider({ children }: { children?: ReactNode }) {
 
-  async function getEntireMedicationsInventory(): Promise<TMedicationWithInventorySchema[]> {
+  async function getEntireMedicationsInventory(): Promise<TMedicationWithBatchSchema[]> {
     return await getData(
       await fetch('http://localhost:3010/medication/get-all', {
         method: 'GET',
@@ -27,7 +27,7 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
           'Content-Type': 'application/json'
         }
       }),
-      medicationWithInventorySchema.array()
+      medicationWithBatchSchema.array()
     );
   }
 
@@ -74,13 +74,13 @@ export function BackendProvider({ children }: { children?: ReactNode }) {
     );
   }
 
-  const insertMedicationRow = async (medication: TMedicationWithInventorySchema): Promise<boolean> => {
-    const payload: TMedicationWithInventorySchema = {
+  const insertMedicationRow = async (medication: TMedicationWithBatchSchema): Promise<boolean> => {
+    const payload: TMedicationWithBatchSchema = {
       ...medication,
       expirationDate: medication.expirationDate
     }
 
-    const result = medicationWithInventorySchema.safeParse(payload);
+    const result = medicationWithBatchSchema.safeParse(payload);
     if (!result.success) return false;
     return (await fetch('http://localhost:3010/medication/insert', {
       method: 'POST',

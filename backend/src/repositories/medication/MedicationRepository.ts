@@ -95,7 +95,7 @@ export class MedicationRepository {
       prisma.generic_name,
       prisma.strength,
       prisma.form,
-      prisma.minimum_quantity
+      prisma.minimum_quantity,
     );
   }
 }

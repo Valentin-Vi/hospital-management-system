@@ -18,6 +18,7 @@
       "@/models/*": ["./src/models/*"],
       "@/models/schemas": ["./src/models/schemas.ts"],
       "@/repositories": ["./src/repositories"],
+      "@/repositories/analytics/types": ["./src/repositories/analytics/types.ts"],
       "@/routers": ["./src/routers"],
       "@/utils": ["./src/utils"],
       "@/utils/types": ["./src/utils/types"],

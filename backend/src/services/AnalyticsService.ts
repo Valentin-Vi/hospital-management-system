@@ -1,18 +1,20 @@
 import { PrismaClient } from "@prisma/client";
-import { AnalyticsRepository } from "@/repositories";
+import { AnalyticsRepository, MedicationQueryRepository } from "@/repositories";
 import { MedicationRepository } from "@/repositories";
 import { BatchRepository } from "@/repositories";
 
 export default class AnalyticsService {
   private analyticsRepo: AnalyticsRepository;
   private medicationRepo: MedicationRepository;
+  private medicationQueryRepo: MedicationQueryRepository;
   private batchRepo: BatchRepository;
 
   constructor() {
     const prisma = new PrismaClient();
     this.medicationRepo = new MedicationRepository(prisma);
+    this.medicationQueryRepo = new MedicationQueryRepository(prisma);
     this.batchRepo = new BatchRepository(prisma);
-    this.analyticsRepo = new AnalyticsRepository(prisma, this.medicationRepo, this.batchRepo);
+    this.analyticsRepo = new AnalyticsRepository(this.medicationRepo, this.medicationQueryRepo, this.batchRepo);
   }
 
   async getDashboardMetrics() {

@@ -1,71 +1,37 @@
 import { PrismaClient } from "@prisma/client";
-import { MedicationRepository } from "../medication/MedicationRepository";
+import { MedicationQueryRepository, MedicationRepository } from "@/repositories";
 import { BatchRepository } from "../batch/BatchRepository";
 import { Medication } from "@/models/medication";
 import { Batch } from "@/models/batch";
 
-/**
- * Repository for cross-cutting analytics queries
- * Combines data from multiple entities for reporting
- */
 export class AnalyticsRepository {
   constructor(
-    private readonly prisma: PrismaClient,
+    // private readonly prisma: PrismaClient,
     private readonly medicationRepo: MedicationRepository,
+    private readonly medicationQueryRepo: MedicationQueryRepository,
     private readonly batchRepo: BatchRepository
   ) {}
 
-  /**
-   * Get medications with low stock (total stock <= minimum_quantity)
-   */
   async getLowStockMedications(): Promise<Array<{
     medication: Medication;
     totalStock: number;
-    minimumQuantity: number;
   }>> {
-    const medications = await this.medicationRepo.findAll();
-    const batches = await this.batchRepo.findAll();
-
-    return medications
-      .map(med => {
-        const totalStock = batches
-          .filter(b => b.medicationId === med.medicationId)
-          .reduce((sum, b) => sum + b.quantity, 0);
-
-        return {
-          medication: med,
-          totalStock,
-          minimumQuantity: med.minimum_quantity
-        };
-      })
-      .filter(item => item.totalStock <= item.minimumQuantity);
+    return await this.medicationQueryRepo.findLowStock()
   }
 
-  /**
-   * Get expired batches
-   */
   async getExpiredBatches(): Promise<Batch[]> {
     return await this.batchRepo.findExpired();
   }
 
-  /**
-   * Get batches expiring soon
-   */
   async getExpiringSoonBatches(days: number = 30): Promise<Batch[]> {
     return await this.batchRepo.findExpiringSoon(days);
   }
 
-  /**
-   * Get total stock across all medications
-   */
   async getTotalStock(): Promise<number> {
     const batches = await this.batchRepo.findAll();
     return batches.reduce((sum, batch) => sum + batch.quantity, 0);
   }
 
-  /**
-   * Get stock distribution by category
-   */
   async getStockDistributionByCategory(): Promise<Array<{
     category: string;
     count: number;
@@ -90,9 +56,6 @@ export class AnalyticsRepository {
     }));
   }
 
-  /**
-   * Get medications that will have insufficient stock after batches expire tomorrow
-   */
   async getMedicationsAtRiskAfterTomorrowExpiration(): Promise<Array<{
     medication: Medication;
     currentTotalStock: number;

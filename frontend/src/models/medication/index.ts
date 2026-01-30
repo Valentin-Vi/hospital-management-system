@@ -5,18 +5,18 @@ export {
 
 import {
   medicationSchema,
-  medicationWithInventorySchema,
+  medicationWithBatchSchema,
 } from './schema'
 export {
   medicationSchema,
-  medicationWithInventorySchema,
+  medicationWithBatchSchema,
 }
 
 import type {
   TMedicationSchema,
-  TMedicationWithInventorySchema,
+  TMedicationWithBatchSchema,
 } from './schema'
 export {
   type TMedicationSchema,
-  type TMedicationWithInventorySchema,
+  type TMedicationWithBatchSchema,
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { inventorySchema } from '@/models/inventory';
+import { BatchSchema } from '@/models/batch';
 
 export const medicationSchema = z.object({
   medicationId: z.number().int(),           // Prisma: Int @id @default(autoincrement())
@@ -9,13 +9,13 @@ export const medicationSchema = z.object({
   genericName: z.string().nonempty().max(255),
   strength: z.string().nonempty().max(255),
   form: z.string().nonempty().max(255),
-  expirationDate: z.iso.datetime(),                               // Prisma: DateTime
+  expirationDate: z.string(),                               // Prisma: DateTime
 }).strict()
 
 export type TMedicationSchema = z.infer<typeof medicationSchema>
 
-export const medicationWithInventorySchema = medicationSchema.extend({
-  inventory: inventorySchema
+export const medicationWithBatchSchema = medicationSchema.extend({
+  batches: BatchSchema.array()
 }).strict()
 
-export type TMedicationWithInventorySchema = z.infer<typeof medicationWithInventorySchema>
+export type TMedicationWithBatchSchema = z.infer<typeof medicationWithBatchSchema>

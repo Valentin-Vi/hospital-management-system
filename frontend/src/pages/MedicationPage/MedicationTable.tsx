@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/shadcn-io/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/shadcn-io/table"
 import { ChevronDown, CirclePlus, Trash2 } from "lucide-react"
 
-import { type TMedicationWithInventorySchema } from "@/models/medication/schema.ts"
+import { type TMedicationWithBatchSchema } from "@/models/medication"
 
 import columns from "./columns"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -25,7 +25,7 @@ const tableProps = {
   getFilteredRowModel: getFilteredRowModel(),
 }
 
-const initInputRowData: TMedicationWithInventorySchema = {
+const initInputRowData: TMedicationWithBatchSchema = {
   medicationId: 0,
   name: '',
   category: '',
@@ -34,12 +34,7 @@ const initInputRowData: TMedicationWithInventorySchema = {
   genericName: '',
   strength: '',
   form: '',
-  inventory: {
-    inventoryId: 0,
-    productId: 0,
-    quantity: 0,
-    minimumQuantity: 0
-  },
+  batches: [],
 };
 
 export default function MedicationsTable() {
@@ -49,14 +44,13 @@ export default function MedicationsTable() {
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
   const [rowSelection, setRowSelection] = useState({});
   
-  // INPUT ROW STATE
   const [showInputRow, setShowInputRow] = useState<boolean>(false);
-  const [inputRowData, setInputRowData] = useState<TMedicationWithInventorySchema>(initInputRowData)
+  const [inputRowData, setInputRowData] = useState<TMedicationWithBatchSchema>(initInputRowData)
 
   const { deleteMedications, insertMedicationRow, getEntireMedicationsInventory } = useBackend()
   const queryClient = useQueryClient()
 
-  const { data: medications = [] } = useQuery<TMedicationWithInventorySchema[]>({
+  const { data: medications = [] } = useQuery<TMedicationWithBatchSchema[]>({
     queryKey: ['medications', 'get-all'],
     queryFn: async () => await getEntireMedicationsInventory(),
   })
@@ -77,7 +71,7 @@ export default function MedicationsTable() {
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => await deleteMedications(ids),
     onSuccess: (_, ids) => {
-      queryClient.setQueryData<TMedicationWithInventorySchema[]>(['medications', 'get-all'], (prev = []) =>
+      queryClient.setQueryData<TMedicationWithBatchSchema[]>(['medications', 'get-all'], (prev = []) =>
         prev.filter((item) => !ids.includes(item.medicationId))
       )
       table.resetRowSelection();
@@ -85,7 +79,7 @@ export default function MedicationsTable() {
   })
 
   const insertMutation = useMutation({
-    mutationFn: async (payload: TMedicationWithInventorySchema) => await insertMedicationRow(payload),
+    mutationFn: async (payload: TMedicationWithBatchSchema) => await insertMedicationRow(payload),
     onSuccess: (completed) => {
       if (completed) {
         queryClient.invalidateQueries({ queryKey: ['medications', 'get-all'] })

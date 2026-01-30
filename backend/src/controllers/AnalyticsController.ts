@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import AnalyticsService from "../services/AnalyticsService";
+import { AnalyticsService }from "@/services";
 
 export default class AnalyticsController {
   private service: AnalyticsService;
